@@ -858,9 +858,94 @@ class Main:
                                                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
                                         }
                                         while True:
-                                            response = self.process_redirect_chain(scraper, url, headers, response.cookies)
-                                            if response:
-                                                break
+                                            z = False
+                                            while True:
+                                                if z:break
+                                                try:
+                                                    response = scraper.get(url, headers=headers, allow_redirects=False, cookies=response.cookies, proxies=self.proxies(), timeout=Checker.timeout)
+                                                    if 'https://www.unrealengine.com:443/id/api/sso?sid=' in response.headers['location']:
+                                                        url = response.headers['location']
+                                                        break
+                                                    else:
+                                                        z = True
+                                                        continue
+                                                except KeyError:
+                                                    z = True
+                                                except Exception as e:
+                                                    print(url)
+                                                    z = True
+                                                    continue
+                                            if z:continue
+                                            headers = {
+                                                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                                                "Accept-Encoding": "gzip, deflate, br, zstd",
+                                                "Accept-Language": "en-US,en;q=0.9",
+                                                "Cache-Control": "no-cache",
+                                                "Pragma": "no-cache",
+                                                "Priority": "u=0, i",
+                                                "Sec-Ch-Ua": "\"Google Chrome\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"",
+                                                "Sec-Ch-Ua-Mobile": "?0",
+                                                "Sec-Ch-Ua-Platform": "\"Windows\"",
+                                                "Sec-Fetch-Dest": "document",
+                                                "Sec-Fetch-Mode": "navigate",
+                                                "Sec-Fetch-Site": "cross-site",
+                                                "Upgrade-Insecure-Requests": "1",
+                                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+                                            }
+                                            g = False
+                                            while True:
+                                                if g: break
+                                                try:
+                                                    response = scraper.get(url, headers=headers, allow_redirects=False, cookies=response.cookies, proxies=self.proxies(), timeout=Checker.timeout)
+                                                    if 'https://www.twinmotion.com:443/id/api/sso?sid=' in response.headers['location']:
+                                                        url = response.headers['location']
+                                                        break
+                                                    else:
+                                                        g = True
+                                                        print(url)
+                                                        continue
+                                                except KeyError:
+                                                    g = True
+                                                except Exception as e:
+                                                    g = True
+                                                    print(url)
+                                                    continue
+                                            if g:continue
+                                            e = False
+                                            while True:
+                                                if e: break
+                                                try:
+                                                    response = scraper.get(url, headers=headers, allow_redirects=False, cookies=response.cookies, proxies=self.proxies(), timeout=Checker.timeout)
+                                                    if 'https://www.fortnite.com:443/id/api/sso?' in response.headers['location']:
+                                                        url = response.headers['location']
+                                                        break
+                                                    else:
+                                                        e = True
+                                                        print(url)
+                                                        continue
+                                                except KeyError:
+                                                    e = True
+                                                except:
+                                                    print(url)
+                                                    continue
+                                            f = False
+                                            while True:
+                                                if f: break
+                                                try:
+                                                    response = scraper.get(url, headers=headers, cookies=response.cookies, proxies=self.proxies(), timeout=Checker.timeout)
+                                                    if 'eg1~' in response.cookies['REFRESH_EPIC_EG1']:
+                                                        break
+                                                    else:
+                                                        print(url)
+                                                        f = True
+                                                        continue
+                                                except KeyError:
+                                                    f = True
+                                                except Exception as e:
+                                                    print(url)
+                                                    continue
+                                            if f:continue
+                                            break
                                         display_name, country, accid, email_verified_status = self.parse_1(response.text)
                                         url = "https://www.epicgames.com/id/api/redirect?"
                                         headers = {
