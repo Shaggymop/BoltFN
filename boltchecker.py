@@ -872,7 +872,6 @@ class Main:
                                                 except KeyError:
                                                     z = True
                                                 except Exception as e:
-                                                    print(url)
                                                     z = True
                                                     continue
                                             if z:continue
@@ -902,13 +901,11 @@ class Main:
                                                         break
                                                     else:
                                                         g = True
-                                                        print(url)
                                                         continue
                                                 except KeyError:
                                                     g = True
                                                 except Exception as e:
                                                     g = True
-                                                    print(url)
                                                     continue
                                             if g:continue
                                             e = False
@@ -921,12 +918,10 @@ class Main:
                                                         break
                                                     else:
                                                         e = True
-                                                        print(url)
                                                         continue
                                                 except KeyError:
                                                     e = True
                                                 except:
-                                                    print(url)
                                                     continue
                                             f = False
                                             while True:
@@ -936,13 +931,11 @@ class Main:
                                                     if 'eg1~' in response.cookies['REFRESH_EPIC_EG1']:
                                                         break
                                                     else:
-                                                        print(url)
                                                         f = True
                                                         continue
                                                 except KeyError:
                                                     f = True
                                                 except Exception as e:
-                                                    print(url)
                                                     continue
                                             if f:continue
                                             break
