@@ -3,7 +3,7 @@ Fortnite account checker using Microsoft authentication. Has many captures inclu
 
 DISCORD: https://discord.gg/bZfEd5hB6S
 
-Features: 
+Features: \n
 Clean UI
 Multithreading
 CUI mode and Log mode
