@@ -1,0 +1,12 @@
+re
+colorama 
+futures
+pyyaml
+deep-translator 
+beautifulsoup4
+urllib
+urllib3 
+requests
+cloudscraper
+thraeding
+discordwebhook
