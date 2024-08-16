@@ -4,25 +4,25 @@ Fortnite account checker using Microsoft authentication. Has many captures inclu
 DISCORD: https://discord.gg/bZfEd5hB6S
 
 Features:
-Clean UI
-Multithreading
-CUI mode and Log mode
-Proxy scraper
-Combo editor (13 different modes)
+Clean UI,
+Multithreading,
+CUI mode and Log mode,
+Proxy scraper,
+Combo editor (13 different modes),
 
 Captures:
-Skins: accounts with unobtainable/og skins saved seperately in results folder otherwise sorted into quantities eg 1-9, 10-49 ect
-NFA (non full access) or FA (full access)
-Vbucks
-Save the world
-first active season
-total wins
-total level
-backblings
-gliders
-pickaxes
-emotes
-2fa (two factor authentication)
+Skins: accounts with unobtainable/og skins saved seperately in results folder otherwise sorted into quantities eg 1-9, 10-49 ect,
+NFA (non full access) or FA (full access),
+Vbucks,
+Save the world,
+first active season,
+total wins,
+total level,
+backblings,
+gliders,
+pickaxes,
+emotes,
+2fa (two factor authentication),
 Country
 
 Proxy format:
