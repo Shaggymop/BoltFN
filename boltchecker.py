@@ -1510,11 +1510,6 @@ class Main:
     def proxies(self):
         if Checker.Proxy.proxy:
             proxy = choice(self.proxylist)
-            if proxy.count(':') == 3:
-                spl = proxy.split(':')
-                proxy = f'{spl[2]}:{spl[3]}@{spl[0]}:{spl[1]}'
-            else:
-                proxy = proxy
             if self.proxy_type.lower() == 'http' or self.proxy_type.lower() == 'https':
                 proxy_form = {'http': 'http://'+proxy, 'https': 'http://'+proxy}
             else:
