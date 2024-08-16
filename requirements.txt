@@ -1,4 +1,4 @@
-re
+regex
 colorama 
 futures
 pyyaml
