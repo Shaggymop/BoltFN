@@ -478,7 +478,7 @@ class Main:
         self.accounts = set([x for x in self.combolist if x != '' and ':' in x])
         removed = withoutremoved - len(self.accounts)
         print(
-        f'{Fore.GREEN}Imported {len(self.accounts)} Proxy lines after removing {removed} duplicates\n')
+        f'{Fore.GREEN}Imported {len(self.accounts)} Combo lines after removing {removed} duplicates\n')
         print(f'{Fore.CYAN}Importing proxies.....\n')
         if Checker.Proxy.proxy == True:
             while True:
