@@ -1,6 +1,5 @@
 regex
 colorama 
-futures
 pyyaml
 deep-translator 
 beautifulsoup4
