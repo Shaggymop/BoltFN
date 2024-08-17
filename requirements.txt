@@ -7,5 +7,4 @@ beautifulsoup4
 urllib3 
 requests
 cloudscraper
-thraeding
 discordwebhook
