@@ -8,4 +8,4 @@ requests
 requests[socks]
 pysocks
 cloudscraper
-discordwebhook
+discord-webhook
