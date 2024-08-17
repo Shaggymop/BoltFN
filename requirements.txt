@@ -6,5 +6,7 @@ deep-translator
 beautifulsoup4
 urllib3 
 requests
+requests[socks]
+pysocks
 cloudscraper
 discordwebhook
