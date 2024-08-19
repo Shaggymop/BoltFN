@@ -9,3 +9,4 @@ requests[socks]
 pysocks
 cloudscraper
 discord-webhook
+brotli
