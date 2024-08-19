@@ -900,11 +900,9 @@ class Main:
                                                     skip = True
                                                     break
                                                 else:
-                                                    print(response.text)
                                                     Counter.retries+=1
                                                     continue
                                             except Exception as e:
-                                                print(response.text)
                                                 Counter.retries+=1
                                                 continue
                                         if not os.path.exists(self.folder + '/NoCapture'):
