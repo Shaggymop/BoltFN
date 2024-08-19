@@ -882,7 +882,7 @@ class Main:
                                                 if '"sid":null,' in response.text or 'Please fill your real email' in response.text:
                                                     if ret >= Checker.retries:
                                                         Counter.mshit+=1
-                                                        Counter.epic2fa
+                                                        Counter.epic2fa+=1
                                                         if 'n' == self.cuimode:
                                                             self.prints(f'{Fore.GREEN}[MS-HIT] - {line}')
                                                         if not os.path.exists(self.folder + '/Microsoft'):
@@ -984,7 +984,7 @@ class Main:
                                                         return
                                                     if '"sid":null,' in response.text or 'Please fill your real email' in response.text:
                                                             Counter.mshit+=1
-                                                            Counter.epic2fa
+                                                            Counter.epic2fa+=1
                                                             if 'n' == self.cuimode:
                                                                 self.prints(f'{Fore.GREEN}[MS-HIT] - {line}')
                                                             if not os.path.exists(self.folder + '/Microsoft'):
