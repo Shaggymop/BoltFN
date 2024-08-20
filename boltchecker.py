@@ -2024,13 +2024,13 @@ class Main:
                         elif 300 <= total_skins:
                             threehundredplus+=1
                         elif 200 <= total_skins <= 299:
-                            twohundredplushundredplus+=1
+                            twohundredplus+=1
                         elif 100 <= total_skins <= 199:
                             onehundredplus+=1
                         elif 50 <= total_skins <= 99:
-                            fiftyplusplus+=1
+                            fiftyplus+=1
                         elif 10 <= total_skins <= 49:
-                            tenplusplus+=1
+                            tenplus+=1
                         elif 1 <= total_skins <= 9:
                             oneplus+=1
                         elif total_skins == 0:
