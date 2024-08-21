@@ -2,13 +2,11 @@ regex
 colorama 
 pyyaml
 deep-translator 
-beautifulsoup4
 urllib3 
 requests
 requests[socks]
 pysocks
 cloudscraper
-discord-webhook
 brotli
 pywin32
-tkinter
+tk-tools
