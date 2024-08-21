@@ -1,6 +1,6 @@
 # BoltFN
 Fortnite account checker using Microsoft authentication. Has many captures including skins
-
+![image-3](https://github.com/user-attachments/assets/54c17d55-dd88-46e6-b580-96be7ebe2080)
 DISCORD: https://discord.gg/bZfEd5hB6S
 
 Features:
@@ -42,5 +42,3 @@ python boltchecker.py
 If you have any issues uninstall python then install version 3.12 make sure to select add to path
 
 DO NOT TRY AND SELL THIS AS YOUR OWN. I made this open source so that people could have something nice for free and maybe learn some python don't take advantage of that.
-
-
