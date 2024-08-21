@@ -10,3 +10,5 @@ pysocks
 cloudscraper
 discord-webhook
 brotli
+pywin32
+tkinter
