@@ -4,9 +4,11 @@ Fortnite account checker using Microsoft authentication. Has many captures inclu
 DISCORD: https://discord.gg/bZfEd5hB6S
 
 Features:
+Full Capture Mode,
+Brute Mode
 Clean UI,
 Multithreading,
-CUI mode and Log mode,
+3 CUI modes and Log mode,
 Proxy scraper,
 Combo editor (13 different modes),
 
