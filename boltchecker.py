@@ -127,7 +127,7 @@ class Main:
         self.created = str(strftime('-[%m-%d-%Y %H-%M-%S]'))
         self.domain_list = self.lisr()
         disable_warnings()
-        self.version = '1.2'
+        self.version = '1.3'
         self.printing = Queue()
         self.caputer = Queue()
         self.start_time = 0
