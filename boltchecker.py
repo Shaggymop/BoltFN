@@ -34,7 +34,7 @@ default_values = '''checker:
   print_fail: false
   print_ms_hit: false
   retries: 1
-  timeout: 10000
+  timeout: 6000
   threads: 25
   save_bad: false
   display_mode: bolt
