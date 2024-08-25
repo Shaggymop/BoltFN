@@ -35,7 +35,7 @@ default_values = '''checker:
   print_ms_hit: false
   retries: 1
   timeout: 10000
-  threads: 100
+  threads: 25
   save_bad: false
   display_mode: bolt
   import_from_file: false
@@ -43,7 +43,7 @@ default_values = '''checker:
     Webhook: false
     WebhookID: https://discordapp.com/api/webhooks/
   proxy:
-    proxy: true
+    proxy: false
     proxy_type: HTTP
     proxy_api: false
     api_link: 
