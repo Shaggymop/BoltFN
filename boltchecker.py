@@ -696,12 +696,13 @@ class Main:
                                 fa = 'True'
                             else:
                                 fa = 'False'
-                            file.write(f'FullAccess: {fa} | VerifiedEmail: {entry['mail_verified']} | TwoFactor: {entry['2fa']} | LinkedAccounts: {entry['linked_accs']} | Balance: {entry['balance']} | LastMatch: {entry['last_login']}\n')
-                            if category !='0 Skins':
+                            file.write(f"FullAccess: {fa} | VerifiedEmail: {entry['mail_verified']} | TwoFactor: {entry['2fa']} | LinkedAccounts: {entry['linked_accs']} | Balance: {entry['balance']} | LastMatch: {entry['last_login']}\n")
+                            if category != '0 Skins':
                                 file.write(f"Skins: [{entry['total_skins']}] {', '.join(entry['skins_list'])}\n")
                             if entry['exclusive']:
-                                file.write(f'Exclusives: [{len(entry['exclusives_list'])}] {', '.join(entry['exclusives_list'])}\n')
-                            file.write("="*30 + "\n")
+                                file.write(f"Exclusives: [{len(entry['exclusives_list'])}] {', '.join(entry['exclusives_list'])}\n")
+                            file.write("=" * 30 + "\n")
+
             sleep(5)
             system('cls')
             print(self.t)
