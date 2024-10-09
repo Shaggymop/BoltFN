@@ -1964,3 +1964,11 @@ CID_A_476_Athena_Commando_F_NeonJam:Mazy
 CID_A_477_Athena_Commando_F_Handlebar:Veronika
 CID_A_478_Athena_Commando_F_WildCard:Loveless
 CID_Jonesy3L:Indiana Jones
+character_infernofncs:Renzo the Champion
+character_bandageninjafncs:Champion Kuno
+character_sweetletter:Black Cat
+character_bikemold:Iron Man Mk 45
+character_freedrive:Ghost Ri-Durrr
+character_rankedscythe:Felina
+character_magmabreak:Polus
+character_livelydomino:Rubius
