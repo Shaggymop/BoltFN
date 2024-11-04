@@ -1681,8 +1681,6 @@ BID_Empty;Empty Backpack
 BID_NPC_CloakedAssassin;The Cubist
 BID_NPC_HightowerDate;TBD
 BID_Random;Random
-BID_STWHero;Hero
-BID_STWHeroNoDefaultBackpack;Hero
 BID_TBD_Cosmos;TBD
 BID_TBD_MechanicalEngineer_Owl;Ohm's Perch
 BoltonPickaxe;Close Shave
@@ -4172,7 +4170,6 @@ EID_Cyclone;Rage
 EID_CycloneHeadBang;Head Banger
 EID_Dab;Dab
 EID_DaBounce;Get Loose
-EID_DanceMoves;Dance Moves
 EID_DarkFireLegends;Unification
 EID_DarkStance;Dark Transformation
 EID_Darling;Boo'd Up Groove
@@ -7071,7 +7068,6 @@ LSID_STW002_Starlight1;Dungeons
 LSID_STW002_StormKing;Storm King
 LSID_STW003_HitTheRoad_MTL;Metal Team Leader
 MusicPack_000_Default;TBD
-MusicPack_000_STW_Default;Save the World
 MusicPack_001_Floss;Squeaky Clean
 MusicPack_002_Spooky;Eerie
 MusicPack_003_OGRemix;OG (Remix)
@@ -8351,7 +8347,6 @@ Pickaxe_ID_851_AstralFemale;Starbolt
 Pickaxe_ID_852_Handlebar_Female;Thudthumper
 Pickaxe_ID_853_NeonJam;Kaleido-Crusher
 Pickaxe_ID_854_WildCard;Stylus Edge
-Pickaxe_ID_STW001_Tier_1;Ol' Woody
 Pickaxe_ID_STW002_Tier_3;Tech Axe
 Pickaxe_ID_STW003_Tier_4;Hydraulic Wrecker
 Pickaxe_ID_STW004_Tier_5;Vindertech Elite
