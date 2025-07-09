@@ -2,7 +2,7 @@
 ![image-3](https://github.com/user-attachments/assets/54c17d55-dd88-46e6-b580-96be7ebe2080)
 
 Fortnite account checker using Microsoft authentication. Has many captures including skins
-DISCORD: https://discord.gg/bZfEd5hB6S
+DISCORD: [https://discord.gg/bZfEd5hB6S](https://discord.gg/CjmZfsQjwX)
 
 Features:
 Full Capture Mode,
